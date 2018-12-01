@@ -106,6 +106,9 @@ function createStudentFullInfo(student) {
 }
 
 
+function makeLink(fileId) {
+  return "https://docs.google.com/spreadsheets/d/" + fileId + "/edit"; 
+}
 
 function testGetStudentByEmail() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
@@ -226,12 +229,12 @@ function getStudents() {
       "year": data[d][COLS.YEAR-1],
       "filename": data[d][COLS.FILENAME-1],
       "fileid": data[d][COLS.FILEID-1],
-      "link":data[d][COLS.LINK-1],
+      "link": makeLink(data[d][COLS.FILEID-1]),
       "tabs": data[d][COLS.TABS-1],
       "row": d+1,
     };
     
-    // TODO DELETE? student.link = "https://docs.google.com/spreadsheets/d/" + student.fileid + "/edit";
+    // TODO DELETE? student.link = makeLink(student.fileid);
     
    // log first 5 records ...
     if (d < 5) {
