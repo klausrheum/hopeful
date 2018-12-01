@@ -22,12 +22,8 @@ var paulson = {
 var bobby = {"email": "bobby.tables@students.hope.edu.kh"};
 
 
-function testTracker() {
-  testGetStudentByEmail(); 
-  testCreateStudentFromSheet;
-}
-
-function testCreateStudentFromSheet() {
+// TODO finish this - add  
+function testUpdateStudentFromSheet() {
   var fromSheetKid = "nofirstname.nolastname@students.hope.edu.kh";
   student = getStudentByEmail(fromSheetKid);
 }
@@ -236,22 +232,22 @@ function getStudents() {
     
     // TODO DELETE? student.link = makeLink(student.fileid);
     
-   // log first 5 records ...
+    // log first 5 records ...
     if (d < 5) {
       //Logger.log(student);
     }
     
-   if (student.email.length < 2 || 
-       student.lastname.length < 2 || 
-       student.firstname.length < 2 || 
-       student.year.length != 3) {
-     logIt(student.email + ", " + 
-           student.lastname + ", " + 
-           student.firstname + ", " + 
-           student.year, meta);
-     throw "Damaged / incomplete student record in Portfolios spreadsheet - CHECK & FIX IMMEDIATELY (row " + student.row + ")";
-   } else {
-     students.push(student);
+    if (student.email.length < 2 || 
+        student.lastname.length < 2 || 
+        student.firstname.length < 2 || 
+        student.year.length != 3) {
+      logIt(student.email + ", " + 
+            student.lastname + ", " + 
+            student.firstname + ", " + 
+            student.year, meta);
+      throw "Damaged / incomplete student record in Portfolios spreadsheet - CHECK & FIX IMMEDIATELY (row " + student.row + ")";
+    } else {
+      students.push(student);
     }
   }
 

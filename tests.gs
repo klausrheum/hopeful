@@ -46,3 +46,10 @@ function testLogIt() {
   if ( answer.text != "testLogIt> Message" ) throw test; 
   
 }
+
+function testTracker() {
+  testGetStudentByEmail(); 
+  testCreateStudentFullInfo();
+  //testCreateStudentFromSheet();
+}
+
