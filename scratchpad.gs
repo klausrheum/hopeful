@@ -7,7 +7,11 @@ function falsey() {
   if (NaN) Logger.log("True!");
   if ('') Logger.log("True!");
   if ("") Logger.log("True!");
+  if ([]) Logger.log("Empty array => true!");
+  if ({}) Logger.log("Empty object => true!");
   
+  student = {}
+  Logger.log(! student.email);
 }
 // Old scale: SCI Y07 Reportbook - done
 // Old scale: MAT Y06 Reportbook - done

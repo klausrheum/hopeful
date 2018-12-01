@@ -24,6 +24,7 @@ var bobby = {"email": "bobby.tables@students.hope.edu.kh"};
 
 function testTracker() {
   testGetStudentByEmail(); 
+  testCreateStudentFromSheet;
 }
 
 function testCreateStudentFromSheet() {
@@ -35,7 +36,8 @@ function testCreateStudentFullInfo() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
   var email = paulson.email;
-  // SETUP: clear fileid field in RB tracker
+  
+  // SETUP:
   deleteRowByEmail(email);
 
   student = createStudentFullInfo(paulson);
@@ -65,7 +67,7 @@ function testCreateStudentFullInfo() {
   }
 
   // TEARDOWN:
-  // deleteRowByEmail(email);
+  deleteRowByEmail(email);
 }
 
 function testDeleteRowByEmail() {
@@ -111,10 +113,11 @@ function testGetStudentByEmail() {
   
   // check empty student returns {}
   student = getStudentByEmail("");
+  Logger.log(student);
   
-  if (student != {}) {
+  if (! student.row == -1) {
     Logger.log(student);
-    throw "getStudentByEmail('') should return {}";
+    throw "getStudentByEmail('') should return {row:-1}";
   }
   
   
@@ -124,7 +127,7 @@ function testGetStudentByEmail() {
 
   // TODO delete bobby's portfolioId from RBs Tracker
   
-  student = getStudentByEmail(bobbyEmail);
+  student = getStudentByEmail(bobby.email);
   Logger.log(student);
   
   // TEARDOWN: delete file "BOBBY, Tables"
@@ -162,6 +165,7 @@ var testFields = [
   for (var f=0; f<testFields.length; f++) { 
     var field = testFields[f];
     if (student[field] != testStudent[field]) {
+      logIt(student, meta);
       throw "testGetStudent() error on field " + field;
     }
     
@@ -170,7 +174,10 @@ var testFields = [
 
 function getStudentByEmail(studentEmail) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
+  var failResponse = {row:-1};
+  
   if (typeof (studentEmail) != "string") {
+    return failResponse
     throw "studentEmail must be a string";
   }
   
@@ -181,7 +188,7 @@ function getStudentByEmail(studentEmail) {
   if (studentEmail == '') 
   { 
     Logger.log("studentEmail was empty");
-    return student;
+    return failResponse
   }
   student.email = studentEmail;
   return getStudent(student);
@@ -220,7 +227,7 @@ function getStudents() {
       "filename": data[d][COLS.FILENAME-1],
       "fileid": data[d][COLS.FILEID-1],
       "link":data[d][COLS.LINK-1],
-      "tabs": data[d][COLS.LINK-1],
+      "tabs": data[d][COLS.TABS-1],
       "row": d+1,
     };
     
