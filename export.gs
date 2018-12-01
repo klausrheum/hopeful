@@ -1,3 +1,27 @@
+function createTestStudent() {
+    createStudentFullInfo(bobby);
+}
+
+function deleteTestStudent() {
+    deleteStudent(bobby);
+}
+
+
+function textAAAExport() {
+  var meta = {'tag': arguments.callee.name, "dest": "L"};
+
+  
+  var rbIds = getRbIds();
+  var aaa_testerbook = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
+  var rbIds = [aaa_testerbook];
+  
+    var rbId = rbIds[0];
+    var rbss = SpreadsheetApp.openById(rbId);
+    logIt("Exporting: " + rbId, meta);
+
+    exportStudentsFromRB(rbss);
+}
+
 function exportAllRBs() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
@@ -161,17 +185,5 @@ function addSubTemplate(student, tabName) {
   return newSheet;
 }
 
-function textAAAExport() {
-  var meta = {'tag': arguments.callee.name, "dest": "L"};
 
-  var rbIds = getRbIds();
-  var aaa_testerbook = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
-  var rbIds = [aaa_testerbook];
-  
-    var rbId = rbIds[0];
-    var rbss = SpreadsheetApp.openById(rbId);
-    logIt("Exporting: " + rbId, meta);
-
-    exportStudentsFromRB(rbss);
-}
 

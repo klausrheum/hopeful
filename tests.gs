@@ -1,3 +1,18 @@
+// test all functions
+
+function testTester() {
+  testTracker();
+}
+
+function testTracker() {
+  testGetStudentByEmail(); 
+  testCreateStudentFullInfo();
+  //testCreateStudentFromSheet();
+}
+
+
+
+
 function logIt(msg, meta, dest_override) {
   
   if (meta === undefined) meta = {tag: "???", "dest": "L"};
@@ -45,11 +60,5 @@ function testLogIt() {
   if ( answer.dest != "C" ) throw "(m) => Logger"; 
   if ( answer.text != "testLogIt> Message" ) throw test; 
   
-}
-
-function testTracker() {
-  testGetStudentByEmail(); 
-  testCreateStudentFullInfo();
-  //testCreateStudentFromSheet();
 }
 

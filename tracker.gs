@@ -19,7 +19,12 @@ var paulson = {
   "year": "Y99"
 }
 
-var bobby = {"email": "bobby.tables@students.hope.edu.kh"};
+var bobby = {
+  "lastname": "Tables",
+  "firstname": "Bobby",
+  "email": "bobby.tables@students.hope.edu.kh",
+  "year": "Y99"
+};
 
 
 // TODO finish this - add  
@@ -70,6 +75,11 @@ function testDeleteRowByEmail() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   deleteRowByEmail(paulson.email);
   deleteRowByEmail(bobby.email);
+}
+
+
+function deleteStudent(student) {
+  deleteRowByEmail(student.email); 
 }
 
 function deleteRowByEmail(email) {
