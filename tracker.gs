@@ -351,17 +351,18 @@ function createPortfolioRow(student) {
   student.row = studentRow
   
   updatePortfolioFormulas();
-  student = createPortfolioFile(student);
-  
   student.fullname = sheet.getRange(student.row, COLS.FULLNAME).getValue();
   student.filename = sheet.getRange(student.row, COLS.FILENAME).getValue();
+  
+  student = createPortfolioFile(student);
   
   // store fileid in tracker
   var rb = SpreadsheetApp.openById(rbTrackerId);
   var sheet = rb.getSheetByName("Portfolios");
   sheet.getRange(student.row, COLS.FILEID).setValue(student.fileid);
   
-  student.filename = sheet.getRange(student.row, COLS.LINK).getValue();
+  student.fileid = sheet.getRange(student.row, COLS.FILEID).getValue();
+  student.link = sheet.getRange(student.row, COLS.LINK).getValue();
   
   return student;
 }
