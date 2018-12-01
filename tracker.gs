@@ -1,3 +1,5 @@
+// TODO add to global object
+
 var COLS = {
   'LASTNAME': 1,
   'FIRSTNAME': 2,
@@ -97,6 +99,8 @@ function createStudentFullInfo(student) {
   catch(e) {
     throw e;
   }
+  
+  return student;
 }
 
 
@@ -348,12 +352,12 @@ function createPortfolioRow(student) {
     student.year
   ]);
   studentRow = sheet.getLastRow();
-  student.row = studentRow
+  student.row = studentRow;
   
   updatePortfolioFormulas();
   student.fullname = sheet.getRange(student.row, COLS.FULLNAME).getValue();
   student.filename = sheet.getRange(student.row, COLS.FILENAME).getValue();
-  
+
   student = createPortfolioFile(student);
   
   // store fileid in tracker
