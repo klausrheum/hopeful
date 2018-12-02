@@ -1,3 +1,8 @@
+// updater.gs ==================================================
+// add columns to teacher RBs (Comments, Date, Tabs, ExportYN
+// update formulas in teacher RBs and student portfolios
+// =============================================================
+
 //var COLS = {
 //  "COMMENT":{"col":25}, // "text": "Comment", "width": 
 //  "TABS": {"col": 26},
@@ -14,7 +19,7 @@ function updateReportbooks() {
   var rbIds = getRbIds();
   var aaa_testerbook = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
   var phy09copy = "1dQra-gLWOZ0oLiUCsGXPGeGNnZQaqI2rEynAYbstdS8";
-  var rbIds = [aaa_testerbook, phy09copy];
+  // var rbIds = [aaa_testerbook, phy09copy];
 
   for (var i in rbIds) {
     //if (i>2) break;
@@ -22,20 +27,19 @@ function updateReportbooks() {
     var ss = SpreadsheetApp.openById(id);
     console.info("Updating " + ss.getName());
     
-    //updateCommentsColumn(ss);
-      //updateExportColumns(ss);
-    //updateFreezeRows(ss);
+    updateCommentsColumn(ss);
+    updateExportColumns(ss);
+    updateFreezeRows(ss);
     updateRBFormulas(ss);
     //updateGradeScale(ss);
-
     //updateConditionalFormatting(ss); // doesn't work in this scope :(
     
-  //   sheet(report)
-  //     // display comment
-  //     .insertFormula(I4, 
-  //      =iferror(index(Grades!$D$7:$Y$46, match($B$4,Grades!$D$7:$D$46,0),22),"")
-  //     .chartType(scatter)
-  //     .trendLines(false)
+    //   sheet(report)
+    //     // display comment
+    //     .insertFormula(I4, 
+    //      =iferror(index(Grades!$D$7:$Y$46, match($B$4,Grades!$D$7:$D$46,0),22),"")
+    //     .chartType(scatter)
+    //     .trendLines(false)
     SpreadsheetApp.flush();
   }
 }

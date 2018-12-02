@@ -11,20 +11,37 @@ function deleteTestStudent() {
     deleteStudent(bobby);
 }
 
+function testupdateGradeFormulas() {
+  var aaaId = "1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U";
+  updateGradeFormulas( SpreadsheetApp.openById(aaaId) );
+}
+
+function updateGradeFormulas(portfolioSs) {
+  var meta = {'tag': arguments.callee.name, "dest": "L"};
+  var rbTemplatesFileId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
+  var templateSs = SpreadsheetApp.openById(rbTemplatesFileId);
+  var sheet = templateSs.getSheetByName("SUB");
+  var formulas = sheet.getRange("B10:AC11").getFormulas();
+  
+  var indRepSheet = portfolioSs.getSheetByName("Individual Report");
+  indRepSheet.getRange("B10:AC11").setFormulas(formulas);
+  indRepSheet.setRowHeight(7, 2);
+  indRepSheet.setRowHeight(8, 2);
+  indRepSheet.setRowHeight(9, 2);
+}
 
 function textAAAExport() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
-
   
   var rbIds = getRbIds();
-  var aaa_testerbook = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
+  var aaa_testerbook = "1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U";
   var rbIds = [aaa_testerbook];
   
-    var rbId = rbIds[0];
-    var rbss = SpreadsheetApp.openById(rbId);
-    logIt("Exporting: " + rbId, meta);
-
-    exportStudentsFromRB(rbss);
+  var rbId = rbIds[0];
+  var rbss = SpreadsheetApp.openById(rbId);
+  logIt("Exporting: " + rbId, meta);
+  
+  exportStudentsFromRB(rbss);
 }
 
 function exportAllRBs() {
@@ -72,6 +89,10 @@ function exportStudentsFromRB(rbss) {
   );
   // logIt("yesRows=" + yesRows, meta);
 
+  if (yesRows.length > 0) {
+    updateGradeFormulas(rbss);
+  }
+  
   // loop through students marked for export ie col Z="Y":
   for (var r=0; r<yesRows.length; r++) {
   //   open student.fileid from RB Tracker
@@ -101,21 +122,27 @@ function exportStudentsFromRB(rbss) {
       logIt(template, meta);
       logIt(template.reportsSheetName, meta);
       
+      // set Full Name
       var rbRepSheet = rbss.getSheetByName(template.reportsSheetName);
-      //   set: B4 => student.fullname, grab B4:U8
       rbRepSheet.getRange("B4").setValue(student.fullname);
-      var dataToCopy = rbRepSheet.getRange("B4:U8").getValues();
-      Logger.log(portfolioSheet.getName() );
-      Logger.log(portfolioSheet.getRange("B4:U8").getValues());
-      portfolioSheet.getRange("B4:U8").setValues(dataToCopy);
+      
+      // copy grades data
+      var dataToCopy = rbRepSheet.getRange("B4:U9").getValues();
+      logIt( portfolioSheet.getName(), meta );
+      logIt( portfolioSheet.getRange("B4:U9").getValues(), meta );
+      portfolioSheet.getRange("B4:U9").setValues(dataToCopy);
+      
+      // wipe out GPA (for now)
       portfolioSheet.getRange("C6:C8").setValue("");
       
-      //   OR
-      //   copy grade data (do the math?) and the comment
+      // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
       
-      //   clear the 'Export' checkbox
-      //   update the 'Last exported' timestamp
-      //   add tabs
+      // TODO add without comments
+      // TODO add SUB with comments
+      // TODO add datestamp
+      // TODO add tabs list
+      // TODO uncheck ExportYN box
+
     }
   }
 }
@@ -158,35 +185,25 @@ function addSubTemplate(student, tabName) {
 
   // copy the 'SUB' tab into the student portfolio
   var subjectSheetName = "SUB";
-  var pastoralTemplateSheet = rbTemplateSS.getSheetByName(subjectSheetName);
-  console.info("ex:adSuTe " + "Adding SUB template to " + student.fullname);
+  var subjectSheetTemplate = rbTemplateSS.getSheetByName("SUB"); // TODO centralise
+  console.info("Adding SUB template to " + student.fullname, meta);
 
   var portfolioFile = SpreadsheetApp.openById(student.fileid); 
-  var sheets = portfolioFile.getSheets();
+  var subSheet = portfolioFile.getSheetByName(tabName);
   
-  // choose a name for the new tab, appending '1' if already exists
-  var candidate = tabName;
-  var tabExists = portfolioFile.getSheetByName(candidate) != null;
+  var sheets = portfolioFile.getSheets();
+  var tabExists = subSheet != null;
   
   if (tabExists) {
-    logIt("Tab " + tabName + " already exists, need to rename", meta);
+    logIt("Tab " + tabName + " already exists, just update it", meta);
     
-    var suffix = 0;
-    while (tabExists) {
-      suffix ++;
-      candidate = tabName + suffix;
-      tabExists = portfolioFile.getSheetByName(candidate) != null;
-      logIt("Tab " + candidate + " exists? " + tabExists, logTag);
-    } 
   } else {
-    logIt("Tab " + tabName + " does not exist, okay to create", meta);
+    logIt("Tab " + tabName + " does not exist. Creating...", meta);
+    subSheet = subjectSheetTemplate.copyTo(portfolioFile);
+    subSheet.setName(tabName);
   }
   
-  logIt("Making new tab: " + candidate, meta);
-  var newSheet = pastoralTemplateSheet.copyTo(portfolioFile);
-  newSheet.setName(candidate);
-  
-  return newSheet;
+  return subSheet;
 }
 
 
