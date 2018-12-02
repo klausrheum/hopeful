@@ -26,4 +26,4 @@ var demoName = "John Chung";
 var demoDocId = "1tDyQaxej77DlwmimdHoxY4Gn_daiavs09KyMM6Mq3nw";
 var demoSsId = "1UV9BysLHpyz4_ycPaV9QO1LxumJYW02umDGQXU2RG-s";
 
-// copyToTable(demoSsId, demoName);
+copyToTable(demoSsId, demoName);
