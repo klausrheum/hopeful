@@ -1,3 +1,9 @@
+// tracker.gs ==================================================
+// functions for managing the Reportbooks Tracker spreadsheet
+// createStudent, deleteStudent, getStudentByEmail, 
+// create portfolio if doesn't exist, copy fileid back into here
+// =============================================================
+
 // TODO add to global object
 
 var COLS = {

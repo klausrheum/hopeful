@@ -1,3 +1,9 @@
+// docs.gs =====================================================
+// idea for copying data to a Google Doc rather than a Sheet,
+// but doesn't look like this will be necessary (export to PDF)
+// =============================================================
+
+
 function createDoc(studentEmail) {
   var doc = DocumentApp.create(studentEmail);
   Logger.log(doc.getUrl());

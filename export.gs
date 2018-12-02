@@ -1,3 +1,8 @@
+// export.gs ===================================================
+// copy data from a student's 'Individual Report' sheet to their
+// Portfolio spreadsheet (and maybe to a text report, who knows?
+// =============================================================
+
 function createTestStudent() {
     createStudentFullInfo(bobby);
 }
@@ -75,8 +80,7 @@ function exportStudentsFromRB(rbss) {
     var student = getStudentByEmail(thisEmail);
     
     if (thisEmail == "") {
-    logIt(student, meta);
-      
+      logIt(student, meta);
       logIt("Email field empty in doc " + srcName + ", skipping", meta);
     } else {
       

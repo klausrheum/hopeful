@@ -1,3 +1,8 @@
+// export.gs ===================================================
+// holds global objects for various doc IDs, eventually these 
+// will be part of the spreadsheet this is attached to...
+// =============================================================
+
 // TODO FIX var sheet = rb.getSheetByName("Portfolios");
 
 // https://developers.google.com/drive/api/v3/reference/files

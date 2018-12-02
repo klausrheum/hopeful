@@ -1,3 +1,7 @@
+// files.gs ====================================================
+// imports files newly shared to Klaus, adds them to the tracker
+// =============================================================
+
 // wrapper to move newly shared files to Reportbooks folder 
 // then add them to the Reportbook Tracker
 function listReportbooks() {
