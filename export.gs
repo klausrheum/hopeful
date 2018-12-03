@@ -127,13 +127,14 @@ function exportStudentsFromRB(rbss) {
       rbRepSheet.getRange("B4").setValue(student.fullname);
       
       // copy grades data
-      var dataToCopy = rbRepSheet.getRange("B4:U8").getValues();
-      logIt( portfolioSheet.getName(), meta );
-      logIt( portfolioSheet.getRange("B4:U8").getValues(), meta );
-      portfolioSheet.getRange("B4:U8").setValues(dataToCopy);
+      var titlesAndPercentages = rbRepSheet.getRange("B4:U8").getValues();
+      portfolioSheet.getRange("B4:U8").setValues(titlesAndPercentages);
+
+      var letterGrades = rbRepSheet.getRange("B10:U11").getValues();
+      portfolioSheet.getRange("B10:U11").setValues(letterGrades);
       
       // wipe out GPA (for now)
-      portfolioSheet.getRange("C6:C8").setValue("");
+      portfolioSheet.getRange("C6:C11").setValue("");
       
       // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
       
