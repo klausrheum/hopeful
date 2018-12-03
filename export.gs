@@ -98,13 +98,13 @@ function exportStudentsFromRB(rbss) {
   //   open student.fileid from RB Tracker
     var row = yesRows[r];
     var thisEmail = row[2];
-    var student = getStudentByEmail(thisEmail);
     
     if (thisEmail == "") {
-      logIt(student, meta);
+      logIt(thisEmail, meta);
       logIt("Email field empty in doc " + srcName + ", skipping", meta);
     } else {
       
+      var student = getStudentByEmail(thisEmail);
       var portfolioFile = SpreadsheetApp.openById(student.fileid);
       
       logIt("Student " + student.fullname + " is tagged for export", meta);
@@ -127,10 +127,10 @@ function exportStudentsFromRB(rbss) {
       rbRepSheet.getRange("B4").setValue(student.fullname);
       
       // copy grades data
-      var dataToCopy = rbRepSheet.getRange("B4:U9").getValues();
+      var dataToCopy = rbRepSheet.getRange("B4:U8").getValues();
       logIt( portfolioSheet.getName(), meta );
-      logIt( portfolioSheet.getRange("B4:U9").getValues(), meta );
-      portfolioSheet.getRange("B4:U9").setValues(dataToCopy);
+      logIt( portfolioSheet.getRange("B4:U8").getValues(), meta );
+      portfolioSheet.getRange("B4:U8").setValues(dataToCopy);
       
       // wipe out GPA (for now)
       portfolioSheet.getRange("C6:C8").setValue("");
