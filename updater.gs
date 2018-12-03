@@ -17,21 +17,27 @@ function updatePortfolios() {
 
 function updateReportbooks() {
   var rbIds = getRbIds();
-  var aaa_testerbook = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
+  var aaa_testerbook = "1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U";
   var phy09copy = "1dQra-gLWOZ0oLiUCsGXPGeGNnZQaqI2rEynAYbstdS8";
-  // var rbIds = [aaa_testerbook, phy09copy];
+  //var rbIds = [aaa_testerbook, phy09copy];
 
   for (var i in rbIds) {
-    //if (i>2) break;
+    
+    // SAFETY CATCH =============================
+    
+    if (i>2) break; // stop after two reportbooks
+    
+    // END SAFETY CATCH =========================
+    
     id = rbIds[i];
     var ss = SpreadsheetApp.openById(id);
     console.info("Updating " + ss.getName());
     
-    // updateCommentsColumn(ss);
+    updateCommentsColumn(ss);
     // updateExportColumns(ss);
     // updateFreezeRows(ss);
     // updateRBFormulas(ss);
-    updateDeleteEmptyTitles(ss);
+    updateDeleteUnusedDatesAndTitles(ss);
     // updateGradeScale(ss);
     // updateConditionalFormatting(ss); // doesn't work in this scope :(
     
@@ -45,25 +51,32 @@ function updateReportbooks() {
   }
 }
 
+function updateDeleteUnusedDatesAndTitles(ss) {
+  var sheet = ss.getSheetByName(template.gradesSheetName);    
+  updateValues(sheet, "H2:3", ["Title", "Date"], ["", ""]);
+}
 
 function updateCommentsColumn(ss) {
   var sheet = ss.getSheetByName(template.gradesSheetName);    
-  
-  // ensure we have 25 columns 'Comment' column
+  sheet.setWrap
+  // ensure we have 28 columns 'Comment' column
   var lastCol = sheet.getLastColumn();
-  while (lastCol < 25) {
+  while (lastCol < 28) {
     sheet.insertColumnBefore(lastCol);
     lastCol ++;
   }
    
-  // if last column isn't 'Comment', make it so
-  var lastTitle = sheet.getRange(3, lastCol).getValue();
-  Logger.log(lastTitle);
-  if (lastTitle != "Comment") {
+  // if column 25 isn't 'Comment', make it so
+  var title = sheet.getRange(3, 25).getValue();
+  Logger.log(title);
+  if (title == "") {
     sheet.getRange("Y3:Y4").setValues([["Comment"],[""]]);
-    sheet.getRange("Y1:Y").setHorizontalAlignment("left");
-    sheet.setColumnWidth(25, 250);
   }
+  sheet.getRange("Y1:Y")
+  .setHorizontalAlignment("left")
+  .setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP)
+  
+  sheet.setColumnWidth(25, 250);  
 }
 // END updateCommentsColumn
 
