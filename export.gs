@@ -13,21 +13,21 @@ function deleteTestStudent() {
 
 function testupdateGradeFormulas() {
   var aaaId = "1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U";
-  updateGradeFormulas( SpreadsheetApp.openById(aaaId) );
+  var aaaSs = SpreadsheetApp.openById(aaaId);
+  updateGradeFormulas( aaaSs );
 }
 
-function updateGradeFormulas(portfolioSs) {
+function updateGradeFormulas(ss) {
+  
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   var rbTemplatesFileId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
   var templateSs = SpreadsheetApp.openById(rbTemplatesFileId);
   var sheet = templateSs.getSheetByName("SUB");
-  var formulas = sheet.getRange("B10:AC11").getFormulas();
+  var formulas = sheet.getRange("A10:AC11").getFormulas();
   
-  var indRepSheet = portfolioSs.getSheetByName("Individual Report");
-  indRepSheet.getRange("B10:AC11").setFormulas(formulas);
-  indRepSheet.setRowHeight(7, 2);
-  indRepSheet.setRowHeight(8, 2);
-  indRepSheet.setRowHeight(9, 2);
+  var portfolioName = ss.getName();
+  var indRepSheet = ss.getSheetByName("Individual Report");
+  indRepSheet.getRange("A10:AC11").setFormulas(formulas);  
 }
 
 function textAAAExport() {

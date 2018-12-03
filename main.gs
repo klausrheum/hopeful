@@ -7,7 +7,7 @@
 
 // https://developers.google.com/drive/api/v3/reference/files
 
-// top level, so we don't keep recreating it
+// TODO convert students to a persistent object?
 var students = [];
 
 var testing = false; // true
