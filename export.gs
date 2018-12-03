@@ -97,14 +97,15 @@ function exportStudentsFromRB(rbss) {
   for (var r=0; r<yesRows.length; r++) {
   //   open student.fileid from RB Tracker
     var row = yesRows[r];
-    var thisEmail = row[2];
+    var rowEmail = row[2]; // col 3, 0-based
+    var rowComment = row[24]; // col Y, 0-based
     
-    if (thisEmail == "") {
-      logIt(thisEmail, meta);
+    if (rowEmail == "") {
+      logIt(rowEmail, meta);
       logIt("Email field empty in doc " + srcName + ", skipping", meta);
     } else {
       
-      var student = getStudentByEmail(thisEmail);
+      var student = getStudentByEmail(rowEmail);
       var portfolioFile = SpreadsheetApp.openById(student.fileid);
       
       logIt("Student " + student.fullname + " is tagged for export", meta);
@@ -136,9 +137,12 @@ function exportStudentsFromRB(rbss) {
       // wipe out GPA (for now)
       portfolioSheet.getRange("C6:C11").setValue("");
       
-      //SpreadsheetApp.setActiveSheet(tabName);
-      //portfolioFile.getActiveSheet().setRowHeights(7, 2, 2);
+      // add Comment
+      portfolioSheet.getRange("I4").setValue(rowComment);
 
+      // clear out unused Titles
+      updateValues(portfolioSheet, "F6:6", ["Title"], [""]);
+      
       // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
       
       // TODO add without comments

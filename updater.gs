@@ -27,12 +27,13 @@ function updateReportbooks() {
     var ss = SpreadsheetApp.openById(id);
     console.info("Updating " + ss.getName());
     
-    updateCommentsColumn(ss);
-    updateExportColumns(ss);
-    updateFreezeRows(ss);
-    updateRBFormulas(ss);
-    //updateGradeScale(ss);
-    //updateConditionalFormatting(ss); // doesn't work in this scope :(
+    // updateCommentsColumn(ss);
+    // updateExportColumns(ss);
+    // updateFreezeRows(ss);
+    // updateRBFormulas(ss);
+    updateDeleteEmptyTitles(ss);
+    // updateGradeScale(ss);
+    // updateConditionalFormatting(ss); // doesn't work in this scope :(
     
     //   sheet(report)
     //     // display comment
@@ -148,6 +149,33 @@ function updateConditionalFormatting(ss) {
 function updateFreezeRows(ss) {
   ss.getSheetByName(template.gradesSheetName).setFrozenRows(6);
 }
+
+function testUpdateValues() {
+  var ss = SpreadsheetApp
+  .openById("1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U");
+  var sheet = ss.getSheetByName(template.gradesSheetName);
+  updateValues(sheet, "H2:3", ["Title", "Date"], ["", ""]);
+}
+
+function updateValues(sheet, rangeA1, oldValues, newValues) {
+  if (oldValues.length != newValues.length) throw "newValues must be same length as oldValues";
+  var data = sheet.getRange(rangeA1).getValues();
+  Logger.log("updateValues: " + data);
+  for (var r = 0; r < data.length; r++) {
+    for (var c = 0; c < data[0].length; c++) {
+      var cellValue = data[r][c];
+      Logger.log("Checking cell["+r+"]["+c+"]=" + cellValue);
+      for (var v = 0; v < oldValues.length; v++) {
+        if (cellValue == oldValues[v]) {
+          data[r][c] = newValues[v];
+          Logger.log("Updated cellValue from " + oldValues[v] + " to " + newValues[v]);
+        }
+      }
+    }
+  }
+  sheet.getRange(rangeA1).setValues(data);
+}
+
 
 
 function updateRBFormulas(ss) {
