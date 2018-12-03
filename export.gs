@@ -49,10 +49,10 @@ function exportAllRBs() {
 
   var rbIds = getRbIds();
   var aaa_testerbook = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
-  var rbIds = [aaa_testerbook];
+  //var rbIds = [aaa_testerbook];
   
   for (var r in rbIds) {
-    //if (r > 1) break;
+    if (r > 2) break;
     
     var rbId = rbIds[r];
     var rbss = SpreadsheetApp.openById(rbId);
@@ -136,6 +136,9 @@ function exportStudentsFromRB(rbss) {
       // wipe out GPA (for now)
       portfolioSheet.getRange("C6:C11").setValue("");
       
+      //SpreadsheetApp.setActiveSheet(tabName);
+      //portfolioFile.getActiveSheet().setRowHeights(7, 2, 2);
+
       // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
       
       // TODO add without comments
