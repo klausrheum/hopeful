@@ -3,6 +3,8 @@
 // Portfolio spreadsheet (and maybe to a text report, who knows?
 // =============================================================
 
+var exportOverride = false;
+
 function createTestStudent() {
     createStudentFullInfo(bobby);
 }
@@ -51,10 +53,11 @@ function exportAllRBs() {
   var aaa99 = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
   var phy09 = "1KeLj6BLp_-_sJZ5FUtuR477C9N9Do1audaQ_Py73iI0";
   var bio10 = "1mYLsiGW_mkFlFnpWBQVp1dk26OyA3b7XEMbo49JKST0";
-  var rbIds = [aaa99, phy09];
+  var engib = "1_BgA4Y2t49eoQdpXyZkZ70sTuUHd1EoMmD6y9bvAsfM";
+  //var rbIds = [engib];
   
   for (var r in rbIds) {
-    if (r > 3) break;
+    //if (r > 10) break;
     
     var rbId = rbIds[r];
     var rbss = SpreadsheetApp.openById(rbId);
@@ -119,7 +122,7 @@ function exportStudentsFromRB(rbss) {
       logIt(rowEmail, meta);
       logIt("Email field empty in doc " + srcName + ", skipping", meta);
     } else {
-      if (rowExportYN == "Y") { 
+      if (rowExportYN == "Y" || exportOverride) { 
         
         var student = getStudentByEmail(rowEmail);
         
@@ -178,12 +181,12 @@ function exportStudentsFromRB(rbss) {
         var newExportYN = exported ? "Y" : "N";
         logIt([rowTimestamp, rowExportTabs, rowExportYN], meta);
         logIt([newTimestamp, newExportTabs, newExportYN], meta);
-        replacementRows[r] = [
+        replacementRows[r] = [[
           newTimestamp, 
           newExportTabs,
           newExportYN
-        ];
-        
+        ]];
+        gradeSheet.getRange(r+7, 26, 1, 3).setValues(replacementRows[r]);
         
         // TODO clear out zero% in IndRep formulas
         
@@ -194,7 +197,7 @@ function exportStudentsFromRB(rbss) {
       }
     }
   }
-  gradeSheet.getRange("Z7:AB46").setValues(replacementRows);
+  // gradeSheet.getRange("Z7:AB46").setValues(replacementRows);
   
 }
 
@@ -237,7 +240,7 @@ function addSubTemplate(student, tabName) {
   // copy the 'SUB' tab into the student portfolio
   var subjectSheetName = "SUB";
   var subjectSheetTemplate = rbTemplateSS.getSheetByName("SUB"); // TODO centralise
-  console.info("Adding SUB template to " + student.fullname, meta);
+  // logIt("Adding SUB template to " + student.fullname , meta, "C");
 
   var portfolioFile = SpreadsheetApp.openById(student.fileid); 
   var subSheet = portfolioFile.getSheetByName(tabName);
@@ -246,10 +249,10 @@ function addSubTemplate(student, tabName) {
   var tabExists = subSheet != null;
   
   if (tabExists) {
-    logIt("Tab " + tabName + " already exists, just update it", meta);
+    logIt("Tab " + tabName + " already exists, just update it", meta, "C");
     
   } else {
-    logIt("Tab " + tabName + " does not exist. Creating...", meta);
+    logIt("Tab " + tabName + " does not exist. Creating...", meta, "C");
     subSheet = subjectSheetTemplate.copyTo(portfolioFile);
     subSheet.setName(tabName);
   }
