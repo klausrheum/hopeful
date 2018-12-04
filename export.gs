@@ -18,8 +18,8 @@ function testupdateGradeFormulas() {
 }
 
 function updateGradeFormulas(ss) {
-  
   var meta = {'tag': arguments.callee.name, "dest": "L"};
+  
   var rbTemplatesFileId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
   var templateSs = SpreadsheetApp.openById(rbTemplatesFileId);
   var sheet = templateSs.getSheetByName("SUB");
@@ -48,11 +48,13 @@ function exportAllRBs() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
   var rbIds = getRbIds();
-  var aaa_testerbook = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
-  //var rbIds = [aaa_testerbook];
+  var aaa99 = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
+  var phy09 = "1KeLj6BLp_-_sJZ5FUtuR477C9N9Do1audaQ_Py73iI0";
+  var bio10 = "1mYLsiGW_mkFlFnpWBQVp1dk26OyA3b7XEMbo49JKST0";
+  //var rbIds = [bio10];
   
   for (var r in rbIds) {
-    if (r > 2) break;
+    if (r > 3) break;
     
     var rbId = rbIds[r];
     var rbss = SpreadsheetApp.openById(rbId);
@@ -79,6 +81,7 @@ function exportStudentsFromRB(rbss) {
   var titles = gradeSheet.getRange("A3:X3").getValues();
   var maxScores = gradeSheet.getRange("A4:X4").getValues();
   var classAverage = gradeSheet.getRange("A6:X6").getValues();
+  
   var namesGrades = gradeSheet.getRange("A7:AB46").getValues();
   //Logger.log(namesGrades, meta);
 
@@ -143,12 +146,18 @@ function exportStudentsFromRB(rbss) {
       // clear out unused Titles
       updateValues(portfolioSheet, "F6:6", ["Title"], [""]);
       
+      // TODO add tabs list
+      var tabsList = porfolioSheet.getSheetNames();
+      
+      
+      // TODO add datestamp
+      
+      // TODO clear out zero% in IndRep formulas
+      
       // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
       
       // TODO add without comments
       // TODO add SUB with comments
-      // TODO add datestamp
-      // TODO add tabs list
       // TODO uncheck ExportYN box
 
     }
