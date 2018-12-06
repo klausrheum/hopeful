@@ -1,7 +1,11 @@
 // export.gs ===================================================
-// holds global objects for various doc IDs, eventually these 
+//rea holds global objects for various doc IDs, eventually these 
 // will be part of the spreadsheet this is attached to...
 // =============================================================
+
+
+// SEE README.gs for details of each file's purpose
+
 
 // TODO FIX var sheet = rb.getSheetByName("Portfolios");
 

@@ -14,7 +14,7 @@ function testTracker() {
 
 
 function logIt(msg, meta, dest_override) {
-  var redirectAll = "C"; // or "" 
+  var redirectAll = ""; // or "" 
   
   if (meta === undefined) meta = {tag: "???", "dest": "L"};
   if (meta.dest === undefined) metadest = "L";
@@ -24,15 +24,15 @@ function logIt(msg, meta, dest_override) {
   output.text = meta.tag + "> " + msg; 
   output.dest = meta.dest;
 
-  if (redirectAll) {
+  if (redirectAll != false) {
     output.dest = redirectAll;
   }
   
-  if (meta.dest == "L") {
+  if (output.dest == "L") {
     Logger.log(output.text);
   }
   
-  if (meta.dest == "C") {
+  if (output.dest == "C") {
     console.info(output.text);
   }
   

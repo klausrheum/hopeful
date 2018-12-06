@@ -54,7 +54,9 @@ function exportAllRBs() {
   var phy09 = "1KeLj6BLp_-_sJZ5FUtuR477C9N9Do1audaQ_Py73iI0";
   var bio10 = "1mYLsiGW_mkFlFnpWBQVp1dk26OyA3b7XEMbo49JKST0";
   var engib = "1_BgA4Y2t49eoQdpXyZkZ70sTuUHd1EoMmD6y9bvAsfM";
-  //var rbIds = [engib];
+  var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
+  
+  var rbIds = [englit09];
   
   for (var r in rbIds) {
     //if (r > 10) break;
@@ -71,12 +73,13 @@ function exportStudentsFromRB(rbss) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
   var srcName = rbss.getName();
+  var owner = rbss.getOwner();
   var len = srcName.length;
   var tabName = srcName.substring(0,len-15);
   var sub = tabName.substring(0, 3);
   var students = getStudents();
   
-  logIt("Exporting " + srcName + " to tab |" + tabName + "|, sub|" + sub + "|", meta);
+  logIt("Exporting " + srcName + " to tab [" + tabName + "] for " + owner, meta);
   
   var gradeSheet = rbss.getSheetByName("Grades");
   
@@ -95,12 +98,12 @@ function exportStudentsFromRB(rbss) {
     return ["Y", "y"].indexOf(arr[27]) > -1;
     }
   );
-  // logIt("yesRows=" + yesRows, meta);
-
+  
   if (yesRows.length > 0) {
     updateGradeFormulas(rbss);
-  }
-  
+  } 
+  logIt("Rows marked for export:" + yesRows.length, meta);
+    
   // loop through students marked for export ie col Z="Y":
   for (var r=0; r<rows.length; r++) {
     var exported = false;
@@ -119,10 +122,10 @@ function exportStudentsFromRB(rbss) {
     ]);
     
     if (rowEmail == "") {
-      logIt(rowEmail, meta);
-      logIt("Email field empty in doc " + srcName + ", skipping", meta);
+      //logIt(rowEmail, meta);
+      //logIt("Email field empty in doc " + srcName + ", skipping", meta, "DEBUG");
     } else {
-      if (rowExportYN == "Y" || exportOverride) { 
+      if (["Y", "y"].indexOf(rowExportYN) > -1 || exportOverride) { 
         
         var student = getStudentByEmail(rowEmail);
         
@@ -130,10 +133,10 @@ function exportStudentsFromRB(rbss) {
           var portfolioFile = SpreadsheetApp.openById(student.fileid);
         }
         catch(e) {
-          console.info("Failed to open file for " + student.email + ", error: " + e); 
+          console.error("Failed to open file for " + student.email + ", error: " + e); 
           break;
         }
-        logIt("Student " + student.fullname + " is tagged for export", meta);
+        logIt("Exporting " + student.fullname, meta);
         
         //   if not exists sheet(sub):
         var tabExists = portfolioFile.getSheetByName(tabName) != null;
@@ -145,8 +148,8 @@ function exportStudentsFromRB(rbss) {
           logIt(tabName + " already exists", meta);
           portfolioSheet = portfolioFile.getSheetByName(tabName);
         }
-        logIt(template, meta);
-        logIt(template.reportsSheetName, meta);
+        //logIt(template, meta);
+        //logIt(template.reportsSheetName, meta);
         
         // set Full Name
         var rbRepSheet = rbss.getSheetByName(template.reportsSheetName);
@@ -179,8 +182,8 @@ function exportStudentsFromRB(rbss) {
         var newTimestamp = "" + new Date();
         var newExportTabs = tabsList.join(", ");
         var newExportYN = exported ? "Y" : "N";
-        logIt([rowTimestamp, rowExportTabs, rowExportYN], meta);
-        logIt([newTimestamp, newExportTabs, newExportYN], meta);
+        //logIt([rowTimestamp, rowExportTabs, rowExportYN], meta);
+        logIt([r, newTimestamp, newExportTabs, newExportYN], meta);
         replacementRows[r] = [[
           newTimestamp, 
           newExportTabs,

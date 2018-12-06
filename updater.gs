@@ -1,6 +1,6 @@
 // updater.gs ==================================================
-// add columns to teacher RBs (Comments, Date, Tabs, ExportYN
-// update formulas in teacher RBs and student portfolios
+// 1. add columns to teacher RBs (Comments, Date, Tabs, ExportYN
+// 2. update formulas in teacher RBs and student portfolios
 // =============================================================
 
 //var COLS = {
@@ -17,15 +17,18 @@ function updatePortfolios() {
 
 function updateReportbooks() {
   var rbIds = getRbIds();
+  
   var aaa_testerbook = "1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U";
   var phy09copy = "1dQra-gLWOZ0oLiUCsGXPGeGNnZQaqI2rEynAYbstdS8";
-  //var rbIds = [aaa_testerbook, phy09copy];
+  var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
+  
+  //var rbIds = [englit09];
 
-  for (var i in rbIds) {
+  for (var i=0; i < rbIds.length; i++) {
     
     // SAFETY CATCH =============================
     
-    if (i>2) break; // stop after two reportbooks
+    //if (i>2) break; // stop after two reportbooks
     
     // END SAFETY CATCH =========================
     
@@ -33,11 +36,11 @@ function updateReportbooks() {
     var ss = SpreadsheetApp.openById(id);
     console.info("Updating " + ss.getName());
     
-    updateCommentsColumn(ss);
-    // updateExportColumns(ss);
+    //updateCommentsColumn(ss);
+    updateExportColumns(ss);
     // updateFreezeRows(ss);
     // updateRBFormulas(ss);
-    updateDeleteUnusedDatesAndTitles(ss);
+    //updateDeleteUnusedDatesAndTitles(ss);
     // updateGradeScale(ss);
     // updateConditionalFormatting(ss); // doesn't work in this scope :(
     
@@ -47,6 +50,7 @@ function updateReportbooks() {
     //      =iferror(index(Grades!$D$7:$Y$46, match($B$4,Grades!$D$7:$D$46,0),22),"")
     //     .chartType(scatter)
     //     .trendLines(false)
+    
     SpreadsheetApp.flush();
   }
 }
@@ -74,7 +78,7 @@ function updateCommentsColumn(ss) {
   }
   sheet.getRange("Y1:Y")
   .setHorizontalAlignment("left")
-  .setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP)
+  .setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
   
   sheet.setColumnWidth(25, 250);  
 }
@@ -125,6 +129,7 @@ function updateExportColumns(ss) {
   .newDataValidation()
   .requireCheckbox("Y", "N")
   .build();
+  
   sheet.getRange("AB7:AB46").setDataValidation(checkboxValidation); 
 
   sheet.setColumnWidth(28, 50);
@@ -137,12 +142,16 @@ function updateExportColumns(ss) {
   sheet.getRange("Y:AA")
   .setHorizontalAlignment("left");
   
+  sheet.getRange("Z7:Z")
+  .setNumberFormat('h PM, ddd mmm dd');
+
+  sheet.getRange("Z7:AA")      // date and tabs
+  .setHorizontalAlignment("left")
+  .setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
+  
   sheet.getRange("AB:AB")
   .setHorizontalAlignment("center");
   
-  sheet.getRange("AA7:AA")
-  .setNumberFormat('hh":"mm":"ss" "ddd" "dd" "mmm" "yyyy');
-
 };
 // END updateExportColumns
 
@@ -195,20 +204,27 @@ function updateRBFormulas(ss) {
 
   var formulas = [
     {
-      // if the Last name column is empty, don't display a grade (eg E-)
       // F6=if(istext(A6), index(Grades, match($G6*100,GradeRange,-1), 1),"")
+      "desc": "if the Last name column is empty, don't display a grade (eg E-)",
       "sheet": "Grades", 
       "cell": "F6", 
       "range": "F7:F", 
       "formula": '=if(istext(A6), index(Grades, match($G6*100,GradeRange,-1), 1),"")'
     },
     {
-      // if the grade is blank, don't include it in the weighting denominator
       // G6=sum(arrayformula(iferror(($H$1:$X$1 / sumif($H6:$X6, "<>", $H$1:$X$1)) * (H6:X6 / $H$4:$X$4))))
+      "desc": "if the grade is blank, don't include it in the weighting denominator",
       "sheet": "Grades", 
       "cell": "G6", 
       "range": "G7:G", 
       "formula": '=sum(arrayformula(iferror(($H$1:$X$1 / sumif($H6:$X6, "<>", $H$1:$X$1)) * (H6:X6 / $H$4:$X$4))))'
+    },
+    {
+      "desc": "if the grade is blank, don't include it in the graph",
+      "sheet": "Individual report",
+      "cell": "F8",
+      "range": "",
+      "formula": '=arrayformula(if(index(Grades!$H$7:$Y$46, match($B$4,Grades!$D$7:$D$46,0)) = "", "", iferror(index(Grades!$H$7:$Y$46, match($B$4,Grades!$D$7:$D$46,0))/PointValues)))'
     }
   ];
 
@@ -222,16 +238,17 @@ function updateFormulas(ss, formulas) {
     var sheet = ss.getSheetByName(update.sheet);
     
     var oldFormula = sheet.getRange(update.cell).getFormula();
-    Logger.log(oldFormula);
+    console.log(update.desc);
     
     // update to new formula
     sheet.getRange(update.cell)
     .setFormula(update.formula);
     
-    // fill down
-    sheet.getRange(update.cell)
-    .copyTo(sheet.getRange(update.range), SpreadsheetApp.CopyPasteType.PASTE_FORMULA);
-    
+    // fill down?
+    if (update.range != "") {
+      sheet.getRange(update.cell)
+      .copyTo(sheet.getRange(update.range), SpreadsheetApp.CopyPasteType.PASTE_FORMULA);
+    }    
   }
 }
 
