@@ -21,8 +21,8 @@ function updateReportbooks() {
   var aaa_testerbook = "1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U";
   var phy09copy = "1dQra-gLWOZ0oLiUCsGXPGeGNnZQaqI2rEynAYbstdS8";
   var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
-  
-  //var rbIds = [englit09];
+  var csc10 = "1jI0UpPD9Imz9SUXwcRUI8CaucrHuKhOg_Mi5GQJKJFI";
+  //var rbIds = [csc10];
 
   for (var i=0; i < rbIds.length; i++) {
     
@@ -36,11 +36,11 @@ function updateReportbooks() {
     var ss = SpreadsheetApp.openById(id);
     console.info("Updating " + ss.getName());
     
-    //updateCommentsColumn(ss);
-    updateExportColumns(ss);
-    // updateFreezeRows(ss);
-    // updateRBFormulas(ss);
-    //updateDeleteUnusedDatesAndTitles(ss);
+    //    updateCommentsColumn(ss);
+    //    updateExportColumns(ss);
+    //    updateFreezeRows(ss);
+    //    updateRBFormulas(ss);
+    //    updateDeleteUnusedDatesAndTitles(ss);
     // updateGradeScale(ss);
     // updateConditionalFormatting(ss); // doesn't work in this scope :(
     

@@ -4,20 +4,6 @@
 // create portfolio if doesn't exist, copy fileid back into here
 // =============================================================
 
-// TODO add to global object
-
-var COLS = {
-  'LASTNAME': 1,
-  'FIRSTNAME': 2,
-  'EMAIL': 3,
-  'FULLNAME': 4,
-  'YEAR': 5,
-  'FILENAME': 6,
-  'FILEID': 7,
-  'LINK': 8,
-  'TABS': 9,
-};
-
 var paulson = {
   "lastname": "Paulson",
   "firstname": "Robert",
@@ -69,7 +55,7 @@ function testCreateStudentFullInfo() {
   if (student.fileid === undefined || student.fileid == "") {
     logIt("Failed to create fileid for " + email, meta);
   }
-  if (student.fileid.length != rbTemplatesId.length) {
+  if (student.fileid.length != top.rbTemplatesId.length) {
     logIt("fileid (" + student.fileid + "wrong length for " + email, meta);
   }
 
@@ -98,7 +84,7 @@ function deleteRowByEmail(email) {
     
     logIt("Deleting " + email + " from row " + student.row, meta);
     SpreadsheetApp
-    .openById(rbTrackerId)
+    .openById(top.rbTrackerId)
     .getSheetByName("Portfolios")
     .deleteRow(student.row);
   }
@@ -211,38 +197,43 @@ function getStudentByEmail(studentEmail) {
 
 function createStudentRBs() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
-  if (students === undefined) {
-    var students = getStudents();
-  }
   
-  for (var s in students) {
-    student = students[s];
-    student.fileid = getStudent(student, students).fileid;
+  for (var s in top.students) {
+    student = top.students[s];
+    student.fileid = getStudent(student).fileid;
   }
 }
 // END createStudentRBs
 
 function getStudents() {
+  // students is now global for speed (!) 
+  if (top.students !== undefined && top.students.length != 0) {
+    console.log("Skipping creation of students", top.students.length);
+    return top.students;
+  }
+}
+
+function initialiseStudents() {
+  console.log ("Initialising students list");
+  var students = [];
   var meta = {'tag': arguments.callee.name, "dest": "L"};
-  var rb = SpreadsheetApp.openById(rbTrackerId);
+  var rb = SpreadsheetApp.openById(top.rbTrackerId);
   var sheet = rb.getSheetByName("Portfolios");
   var data = sheet.getDataRange().getValues();
   
-  // TODO DEL? This condition previously applied to the next line if (students === undefined) 
-  var students = [];
   var student;
   
   for (var d=1; d<data.length; d++) { // skip titles row
     student = {
-      "lastname": data[d][COLS.LASTNAME-1],
-      "firstname": data[d][COLS.FIRSTNAME-1],
-      "email": data[d][COLS.EMAIL-1],
-      "fullname": data[d][COLS.FULLNAME-1],
-      "year": data[d][COLS.YEAR-1],
-      "filename": data[d][COLS.FILENAME-1],
-      "fileid": data[d][COLS.FILEID-1],
-      "link": makeLink(data[d][COLS.FILEID-1]),
-      "tabs": data[d][COLS.TABS-1],
+      "lastname": data[d][top.COLS.LASTNAME-1],
+      "firstname": data[d][top.COLS.FIRSTNAME-1],
+      "email": data[d][top.COLS.EMAIL-1],
+      "fullname": data[d][top.COLS.FULLNAME-1],
+      "year": data[d][top.COLS.YEAR-1],
+      "filename": data[d][top.COLS.FILENAME-1],
+      "fileid": data[d][top.COLS.FILEID-1],
+      "link": makeLink(data[d][top.COLS.FILEID-1]),
+      "tabs": data[d][top.COLS.TABS-1],
       "row": d+1,
     };
     
@@ -272,22 +263,18 @@ function getStudents() {
   
   return students; 
 }
-// END getStudents
+// END initialiseStudents
 
 function getStudent(student) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   // search RB Tracker for student.email:
   // return student or return student.row = -1
   
-  if (students === undefined) {
-    var students = getStudents();
-  }
-  
   var studentFound = false;
-  for (var s=0; s < students.length; s++) {
-    var thisStudent = students[s];
+  for (var s=0; s < top.students.length; s++) {
+    var thisStudent = top.students[s];
     if (thisStudent.email == student.email) {
-      student = students[s];
+      student = top.students[s];
       studentFound = true;
       break;
     }
@@ -343,13 +330,13 @@ function createPortfolioRow(student) {
     throw errMsg;
   }
   
-  var rb = SpreadsheetApp.openById(rbTrackerId);
+  var rb = SpreadsheetApp.openById(top.rbTrackerId);
   var sheet = rb.getSheetByName("Portfolios");
  
   var studentRow = -1;
   var rows = sheet.getDataRange().getValues();
   for (var i=1; i<rows.length; i++) {
-    var thisEmail = rows[i][COLS.EMAIL - 1];
+    var thisEmail = rows[i][top.COLS.EMAIL - 1];
 
     if (thisEmail.indexOf(student.email) == 0) {
       studentRow = i+1;
@@ -377,18 +364,18 @@ function createPortfolioRow(student) {
   student.row = studentRow;
   
   updatePortfolioFormulas();
-  student.fullname = sheet.getRange(student.row, COLS.FULLNAME).getValue();
-  student.filename = sheet.getRange(student.row, COLS.FILENAME).getValue();
+  student.fullname = sheet.getRange(student.row, top.COLS.FULLNAME).getValue();
+  student.filename = sheet.getRange(student.row, top.COLS.FILENAME).getValue();
 
   student = createPortfolioFile(student);
   
   // store fileid in tracker
-  var rb = SpreadsheetApp.openById(rbTrackerId);
+  var rb = SpreadsheetApp.openById(top.rbTrackerId);
   var sheet = rb.getSheetByName("Portfolios");
-  sheet.getRange(student.row, COLS.FILEID).setValue(student.fileid);
+  sheet.getRange(student.row, top.COLS.FILEID).setValue(student.fileid);
   
-  student.fileid = sheet.getRange(student.row, COLS.FILEID).getValue();
-  student.link = sheet.getRange(student.row, COLS.LINK).getValue();
+  student.fileid = sheet.getRange(student.row, top.COLS.FILEID).getValue();
+  student.link = sheet.getRange(student.row, top.COLS.LINK).getValue();
   
   return student;
 }
@@ -400,10 +387,10 @@ function createPortfolioFile(student) {
   if (student.filename === undefined || student.filename.length < 2) {
     throw "Cannot create portfolio file, missing student.filename"  
   }
+  var templatesId = SpreadsheetApp.openById(top.rbTemplatesId);
   
   var pastoralSheetName = "Pastoral";
   
-  var templatesId = SpreadsheetApp.openById(rbTemplatesId);
   var pastoralTemplateSheet = templatesId.getSheetByName(pastoralSheetName);
   
   var new_rows = 5;
@@ -459,7 +446,7 @@ function updatePortfolioFormulas() {
     }
   ];
   
-  var rb = SpreadsheetApp.openById(rbTrackerId);
+  var rb = SpreadsheetApp.openById(top.rbTrackerId);
   updateFormulas(rb, formulas);
   
 }

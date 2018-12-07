@@ -11,12 +11,28 @@
 
 // https://developers.google.com/drive/api/v3/reference/files
 
-// TODO convert students to a persistent object?
-var students = [];
+var top = {
+  COLS: {
+    'LASTNAME': 1,
+    'FIRSTNAME': 2,
+    'EMAIL': 3,
+    'FULLNAME': 4,
+    'YEAR': 5,
+    'FILENAME': 6,
+    'FILEID': 7,
+    'LINK': 8,
+    'TABS': 9
+  },
+  "students": [],
+  "rbTrackerId": "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc",
+  "rbTemplatesId": "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys"
+
+};
+
+top.students = initialiseStudents();
 
 var testing = false; // true
 var folderRB = "1SxM_NQ8ZsDzZPaZAhfdTXl7e21eFJBkk";
-var rbTrackerId = "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc";
 var listRBs = "1EAW-XHHtA1gIFoXe3sruqTHXtKi07xBxP4oXbWObCgU";
 
 var rbTestIds = [
@@ -37,7 +53,6 @@ var testRB = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
 
 var testStudentEmail = "tom.kershaw@students.hope.edu.kh";
 
-var rbTemplatesId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
 var template = {
   "titlesRow" : 3,
   "overviewSheetName": "Overview",
@@ -63,7 +78,7 @@ var template = {
 
 function getRbIds() {
 
-  var raw_ids = SpreadsheetApp.openById(rbTrackerId)
+  var raw_ids = SpreadsheetApp.openById(top.rbTrackerId)
   .getSheetByName("Reportbooks")
   .getRange("A2:A").getValues();
   //Logger.log(raw_ids);
@@ -175,7 +190,6 @@ function listGrades(courseId, studentEmail) {
 var courseId = 16052292479;
 var courseWorkId = 16052292479;
 mrkershaw = 107554112463094781867;
-students = [];
 
 
 function listAllStudents() {

@@ -2,6 +2,12 @@
 
 function testTester() {
   testTracker();
+  testExport();
+}
+
+function testExport() {
+  textAAAExport();
+  testupdateGradeFormulas();
 }
 
 function testTracker() {
