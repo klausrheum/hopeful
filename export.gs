@@ -9,6 +9,43 @@
 
 var exportOverride = "Y";
 
+function exportAllRBs() {
+  var meta = {'tag': arguments.callee.name, "dest": "L"};
+
+  var rbIds = getRbIds();
+  var aaa99 = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
+  var phy09 = "1KeLj6BLp_-_sJZ5FUtuR477C9N9Do1audaQ_Py73iI0";
+  var bio10 = "1mYLsiGW_mkFlFnpWBQVp1dk26OyA3b7XEMbo49JKST0";
+  var engib = "1_BgA4Y2t49eoQdpXyZkZ70sTuUHd1EoMmD6y9bvAsfM";
+  var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
+  var spa12 = "11cztmZuO_8XZy6valpY-HbQr4S_qBXpbTi6lmdTxhVo";
+  
+  //var rbIds = [spa12];
+  var startTime = new Date();
+  
+  console.warn(
+    "exportAllRBs: STARTED " + startTime );
+  
+  for (var r = 0; r<rbIds.length; r++) {
+    // if (r > 2) break;
+    
+    var rbId = rbIds[r];
+    var rbss = SpreadsheetApp.openById(rbId);
+    var rbName = rbss.getName();
+    
+    //console.warn("Starting %s ", rbName);
+    
+    exportStudentsFromRB(rbss);
+  }
+  
+  var endTime = new Date();
+  var elapsedTime = (endTime - startTime)/1000;
+  
+  console.warn(
+    "exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
+}
+
+
 function createTestStudent() {
     createStudentFullInfo(bobby);
 }
@@ -48,42 +85,6 @@ function textAAAExport() {
   logIt("Exporting: " + rbId, meta);
   
   exportStudentsFromRB(rbss);
-}
-
-function exportAllRBs() {
-  var meta = {'tag': arguments.callee.name, "dest": "L"};
-
-  var rbIds = getRbIds();
-  var aaa99 = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
-  var phy09 = "1KeLj6BLp_-_sJZ5FUtuR477C9N9Do1audaQ_Py73iI0";
-  var bio10 = "1mYLsiGW_mkFlFnpWBQVp1dk26OyA3b7XEMbo49JKST0";
-  var engib = "1_BgA4Y2t49eoQdpXyZkZ70sTuUHd1EoMmD6y9bvAsfM";
-  var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
-  var spa12 = "11cztmZuO_8XZy6valpY-HbQr4S_qBXpbTi6lmdTxhVo";
-  
-  //var rbIds = [spa12];
-  var startTime = new Date();
-  
-  console.warn(
-    "exportAllRBs: STARTED " + startTime );
-  
-  for (var r = 0; r<rbIds.length; r++) {
-    // if (r > 2) break;
-    
-    var rbId = rbIds[r];
-    var rbss = SpreadsheetApp.openById(rbId);
-    var rbName = rbss.getName();
-    
-    //console.warn("Starting %s ", rbName);
-    
-    exportStudentsFromRB(rbss);
-  }
-  
-  var endTime = new Date();
-  var elapsedTime = (endTime - startTime)/1000;
-  
-  console.warn(
-    "exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
 }
 
 function exportStudentsFromRB(rbss) {
@@ -313,20 +314,6 @@ function exportStudentsFromRB(rbss) {
   
 }
 
-function addSubToEveryStudent() {
-  var meta = {'tag': arguments.callee.name, "dest": "L"};
-  
-  if (top.students === undefined) {
-    top.students = initialiseStudents();
-  }
-  
-  for (var s = 0; s < top.students.length; s++) {
-    var student = top.students[s];
-    addSubTemplate(student) ;
-    // if (s>2) break;
-  }
-}
-
 function testAddSubTemplate() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
@@ -335,16 +322,110 @@ function testAddSubTemplate() {
   logIt(newSheet, meta);
 }
 
-function orderTabs(ss) {
-  // loop through the tabs, sorting them into order
-  var meta = {'tag': arguments.callee.name, "dest": "L"};
+
+function copyPastoralToAdmin() {  
   
+  for (var s = 0; s < top.students.length; s++) {
+    
+    //if (s >= 40) break;
+    
+    var student = top.students[s];
+    var sheet = copyTemplateToStudent(student, "Admin", false);
+    
+    var ss = SpreadsheetApp.openById(student.fileid);
+    var admin = ss.getSheetByName("Admin");
+    var pastoral = ss.getSheetByName("Pastoral");
+
+    admin.getRange("B5").setValue(student.firstname);
+    admin.getRange("B6").setValue(student.lastname);
+    admin.getRange("B7").setValue(student.email);
+    
+    var extra = pastoral.getRange("B7:C7").getValues()[0];
+    extra = extra.join(" ");
+    var extraLabel = "Extra curricular activities:";
+    if (extra.indexOf(extraLabel) == 0) {
+     extra = extra.slice(extraLabel.length);
+    }
+    admin.getRange("B9").setValue(extra.trim() );
+    
+    var comment = pastoral.getRange("B20").getValue();
+    admin.getRange("B11").setValue(comment);
+    
+    var attributes = pastoral.getRange("C10:C18").getValues();
+    admin.getRange("B13:B21").setValues(attributes);
+  }
+}
+
+
+
+function adminFirstOnEveryStudent() {  
+  for (var s = 0; s < top.students.length; s++) {
+    // if (s>2) break;
+    var student = top.students[s];
+    var ss = SpreadsheetApp.openById(student.fileid);
+    
+    var sheet;
+    // sheet = copyTemplateToStudent(student, "Admin", true);
+    sheet = ss.getSheetByName("Admin");
+    
+    SpreadsheetApp.setActiveSpreadsheet(ss);
+    SpreadsheetApp.setActiveSheet(sheet);
+    SpreadsheetApp.getActiveSpreadsheet().moveActiveSheet(1);
+    
+    
+  }
+}
+
+function addPastoralToEveryStudent() {  
+  for (var s = 0; s < top.students.length; s++) {
+    // if (s>2) break;
+    var student = top.students[s];
+    var sheet = copyTemplateToStudent(student, "Pastoral", true);
+    Logger.log(sheet.getName());
+    var ss = SpreadsheetApp.openById(student.fileid);
+    SpreadsheetApp.setActiveSpreadsheet(ss);
+    SpreadsheetApp.setActiveSheet(sheet);
+    SpreadsheetApp.getActiveSpreadsheet().moveActiveSheet(1);
+  }
+}
+
+function copyTemplateToStudent(student, templateName, replace) {
+  if (replace === undefined) replace = false;
+  
+  return copySheet(top.rbTemplatesId, student.fileid, 
+               templateName, templateName, replace);
+}
+
+function copySheet(srcId, destId, srcName, destName, replace) {
+  if (replace === undefined) {
+    replace = false;
+  }
+  var srcFile = SpreadsheetApp.openById(srcId);
+  var destFile = SpreadsheetApp.openById(destId); 
+  var srcSheet = srcFile.getSheetByName(srcName);
+  
+  var destSheet = destFile.getSheetByName(destName);
+  var destSheetExists = destSheet != null;
+  
+  if (destSheetExists) {
+    if (replace) {
+      //destFile.deleteSheet(destSheet);
+      var random = randInt(10000,99999);
+      destSheet.setName(destSheet.getName() + random).hideSheet();
+    } else {
+      return destSheet;
+    }
+  }
+  
+  destSheet = srcSheet.copyTo(destFile);
+  destSheet.setName(destName);
+  return destSheet;
 }
 
 function addSubTemplate(student, tabName) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   Logger.log(student);
-  Logger.log(subYear);
+  Logger.log(tabName);
   
   if (tabName === undefined) {
     tabName = "SUB"
@@ -361,9 +442,9 @@ function addSubTemplate(student, tabName) {
 
   var portfolioFile = SpreadsheetApp.openById(student.fileid); 
   var subSheet = portfolioFile.getSheetByName(tabName);
+  var tabExists = subSheet != null;
   
   var sheets = portfolioFile.getSheets();
-  var tabExists = subSheet != null;
   
   if (tabExists) {
     logIt("Tab " + tabName + " already exists, just update it", meta, "C");
@@ -375,4 +456,10 @@ function addSubTemplate(student, tabName) {
   }
   
   return subSheet;
+}
+
+function orderTabs(ss) {
+  // loop through the tabs, sorting them into order
+  var meta = {'tag': arguments.callee.name, "dest": "L"};
+  
 }

@@ -11,12 +11,20 @@
 //};
 //Logger.log(COLS.COMMENT);
 
+var OLD = 0;
+var NEW = 1;
 
 function updatePortfolios() {
   // add attendance
   // add Cheryl's blurb
   // copy Pastoral Comment, sometimes, extra-curric & absent to RB Tracker
   
+  version = OLD;
+  
+  var startTime = new Date();
+  console.warn(
+    "updatePortfolios: STARTED " + startTime );
+
   for (var i=0; i < top.students.length; i++) {
     var student = top.students[i];
     // SAFETY CATCH =============================
@@ -26,9 +34,46 @@ function updatePortfolios() {
     // END SAFETY CATCH =========================
     var id = student.fileid;
     var ss = SpreadsheetApp.openById(id);
-    console.info("Updating " + ss.getName());
-    
+    console.info("Backing up " + ss.getName());
+    var comment = backupPortfolio(ss);
   }
+  
+  var endTime = new Date();
+  var elapsedTime = (endTime - startTime)/1000;
+  console.warn(
+    "updatePortfolios: COMPLETED %s in %s secs", endTime, elapsedTime);
+
+}
+
+function testBackupPortfolio() {
+  var lily = "1-Uj_-YAE1YNtqrxJmiW8cYt5hJQn1lCYvFyYAHMMC4Y";
+  var ss = SpreadsheetApp.openById(lily);
+  version = NEW;
+  var data = backupPortfolio(ss);
+  if (comment.slice(0, 4) != "Lily") {
+    throw "FAIL (backupPortfolio): text not found in " + comment;
+  }
+}
+
+function backupPortfolio(ss) {
+  
+  // UNFINISHED - DO NOT USE //
+  
+  var pastoral = {
+    "studentname": ["B4", "B4"],
+    "comment": ["B20", "B7"],
+    "extra": ["B8", "B12"],
+    "attributes": ["C10:C18", "C15:C23"]
+  }
+
+  var sheet = ss.getSheetByName("Pastoral");
+  var raw = sheet.getDataRange().getValues();
+  var data = {};
+  data.name = raw[3, 1];
+  data.comment = raw[19, 1];
+  data.extra = raw[6, 1];
+  data.attributes = sheet.getRange("");
+  return data;
 }
 
 function updateReportbooks() {

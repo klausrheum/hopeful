@@ -100,6 +100,10 @@ function listCoursesForTom() {
   return listCourses(studentEmail);
 }
 
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 function listCourses(studentEmail) {
   var optionalArgs = {
     pageSize: 100,
