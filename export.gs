@@ -6,6 +6,7 @@
 // "ALL"  = export all, regardless
 // "Y"    = export records marked Y
 // "NONE" = dry run (for error log)
+
 var exportOverride = "Y";
 
 function createTestStudent() {
@@ -62,7 +63,9 @@ function exportAllRBs() {
   
   //var rbIds = [spa12];
   var startTime = new Date();
-  console.warn("exportAllRBs: STARTED " + startTime );
+  
+  console.warn(
+    "exportAllRBs: STARTED " + startTime );
   
   for (var r = 0; r<rbIds.length; r++) {
     // if (r > 2) break;
@@ -75,9 +78,12 @@ function exportAllRBs() {
     
     exportStudentsFromRB(rbss);
   }
+  
   var endTime = new Date();
   var elapsedTime = (endTime - startTime)/1000;
-  console.warn("exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
+  
+  console.warn(
+    "exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
 }
 
 function exportStudentsFromRB(rbss) {
@@ -109,12 +115,14 @@ function exportStudentsFromRB(rbss) {
     //console.log("title: %s maxScore: %s avg: %s", title, maxScore, avg);
     if (title != "" && title.indexOf("REP") > -1) {
       if (maxScore == "") {
-        console.warn("[%s] Max score required for %s", 
-                     subYear, title);
+        console.warn(
+          "[%s] Max score required for %s", 
+          subYear, title);
       }
       if (avg == "") {
-        console.warn("[%s] Average score formula required for %s", 
-                     subYear, title);
+        console.warn(
+          "[%s] Average score formula required for %s", 
+          subYear, title);
       }  
     }
   }
@@ -166,8 +174,9 @@ function exportStudentsFromRB(rbss) {
     if (rowEmail == "") {
 
       if (rowLastname != "") { // student has last name
-        console.warn("[%s] EMAIL? %s missing email", 
-                     subYear, rowFullname);
+        console.warn(
+          "[%s] EMAIL? %s missing email", 
+          subYear, rowFullname);
         
         // Fullname formula missing
         if (rowFirstname + " " + rowLastname != rowFullname) {
@@ -178,10 +187,11 @@ function exportStudentsFromRB(rbss) {
 
     } else { // row has an email
       
-      if (exportOverride == "ALL" || ["Y", "y"].indexOf(rowExportYN) > -1) { 
+      if (exportOverride != "Y" || ["Y", "y"].indexOf(rowExportYN) > -1) { 
         
-        console.log("[%s] STARTING: %s (%s)", 
-                    subYear, rowFullname, rowEmail);
+        console.log(
+          "[%s] STARTING: %s (%s)", 
+          subYear, rowFullname, rowEmail);
         
         // count grades entered...
         var rowScores = [];
@@ -193,14 +203,14 @@ function exportStudentsFromRB(rbss) {
         
         // ... 3 or fewer grades ?
         if (rowScores.length <= 3) {
-          console.warn(
+          console.info(
             '[%s] FEW? %s grade(s) - %s',
             subYear, rowScores.length.toString(), rowFullname);
         }
         
         // ... average score less than 30% ?
         if (rowAvgPercent < 0.30) {
-          console.warn(
+          console.info(
             "[%s] LOW? %s graded %s (%s = %s)", 
             subYear, rowFullname, 
             rowAvgGrade,  
@@ -215,8 +225,9 @@ function exportStudentsFromRB(rbss) {
           portfolioFile = SpreadsheetApp.openById(student.fileid);
         }
         catch(e) {
-          console.error("[%s] FILE? %s, error: ", 
-                        subYear, student.email, e);           
+          console.error(
+            "[%s] FILE? %s, error: ", 
+            subYear, student.email, e);           
         }
         
         if (portfolioFile != "") {
@@ -291,7 +302,10 @@ function exportStudentsFromRB(rbss) {
           console.log("No Portfolio, ignored");
           gradeSheet.getRange(r+7, 26, 1, 3).setValues([[newTimestamp, "No Portfolio, ignored", "N"]]);
         }
-        console.log("FINISHED: %s to %s", student.fullname, url);
+
+        console.log(
+          "[%s] FINISHED: %s", 
+          subYear, student.fullname);
       }
     }
   }
