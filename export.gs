@@ -3,7 +3,7 @@
 // Portfolio spreadsheet (and maybe to a text report, who knows?
 // =============================================================
 
-var exportOverride = true;
+var exportOverride = false;
 
 function createTestStudent() {
     createStudentFullInfo(bobby);
@@ -55,23 +55,26 @@ function exportAllRBs() {
   var bio10 = "1mYLsiGW_mkFlFnpWBQVp1dk26OyA3b7XEMbo49JKST0";
   var engib = "1_BgA4Y2t49eoQdpXyZkZ70sTuUHd1EoMmD6y9bvAsfM";
   var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
+  var spa12 = "11cztmZuO_8XZy6valpY-HbQr4S_qBXpbTi6lmdTxhVo";
   
-  //var rbIds = [phy09];
-  
-  console.time("exportAllRBs: STARTED");
+  //var rbIds = [spa12];
+  var startTime = new Date();
+  console.warn("exportAllRBs: STARTED " + startTime );
   
   for (var r = 0; r<rbIds.length; r++) {
-    // if (r > 2) break;
+    if (r > 2) break;
     
     var rbId = rbIds[r];
     var rbss = SpreadsheetApp.openById(rbId);
     var rbName = rbss.getName();
     
-    console.info("Starting %s ", rbName);
+    //console.warn("Starting %s ", rbName);
     
     exportStudentsFromRB(rbss);
   }
-  console.timeEnd("exportAllRBs: CONPLETED");
+  var endTime = new Date();
+  var elapsedTime = endTime - startTime;
+  console.warn("exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
 }
 
 function exportStudentsFromRB(rbss) {
@@ -84,15 +87,27 @@ function exportStudentsFromRB(rbss) {
   var sub = tabName.substring(0, 3);
   //var students = getStudents();
   
-  console.info("Exporting %s to tab [%s] for %s", srcName, tabName, owner, meta);
+  console.warn("Exporting %s to tab [%s] for %s", srcName, tabName, owner, meta);
   
   var gradeSheet = rbss.getSheetByName("Grades");
   
-  // TODO: use these to update the portfolio directly?
+  // TODO: v2 use these to update the portfolio directly?
   var titles = gradeSheet.getRange("A3:X3").getValues();
   var maxScores = gradeSheet.getRange("A4:X4").getValues();
-  var classAverage = gradeSheet.getRange("A6:X6").getValues();
-  
+  var classAverages = gradeSheet.getRange("A6:X6").getValues();
+  console.log(titles, maxScores, classAverages);
+  // check for missing max & average in REP columns
+  for (var c = 8; c < titles.length; c++) {
+    var title = titles[0][c];
+    var maxScore = maxScores[0][c];
+    var avg = classAverages[0][c];
+    
+    console.log("title: %s maxScore: %s avg: %s", title, maxScore, avg);
+//    if (title  != "" && title {
+//      if (title 
+      
+//    }
+  }
   var rows = gradeSheet.getRange("A7:AB46").getValues();
   var replacementRows = [];
 
@@ -138,11 +153,13 @@ function exportStudentsFromRB(rbss) {
       console.log("Row %d no email - skipping", r, meta);
       //logIt(rowEmail, meta);
 
-      if (rowLastname != "" && rowEmail == "") {
-        console.warn("Student has last name but is missing email: %s in %s", rowLastname, srcName, meta);
-      }
-      if (rowFirstname + " " + rowLastname != rowFullname) {
-        console.warn("'%s != %s+%s in %s", rowFullname, rowFirstname, rowLastname, srcName, meta);
+      if (rowLastname != "") { // student has last name
+        console.warn("ERROR %s student has name (%s %s) but no email", srcName, rowFirstname, rowLastname, meta);
+        
+        // Fullname formula missing
+        if (rowFirstname + " " + rowLastname != rowFullname) {
+          console.warn("Fullname formula missing in col C: %s != %s+%s in %s", rowFullname, rowFirstname, rowLastname, srcName, meta);
+        }
       }
 
     } else {
@@ -216,7 +233,7 @@ function exportStudentsFromRB(rbss) {
                 '")';
           
           //logIt([rowTimestamp, rowExportTabs, rowExportYN], meta);
-          console.log([r, newTimestamp, newExportTabs, newExportYN], meta);
+          //console.log([r, newTimestamp, newExportTabs, newExportYN], meta);
           
           replacementRows[r] = [[
             newTimestamp, 
