@@ -1,5 +1,5 @@
 // export.gs ===================================================
-//rea holds global objects for various doc IDs, eventually these 
+// holds global objects for various doc IDs, eventually these 
 // will be part of the spreadsheet this is attached to...
 // =============================================================
 
@@ -78,22 +78,22 @@ var template = {
 
 function getRbIds() {
 
-  var raw_ids = SpreadsheetApp.openById(top.rbTrackerId)
+  var rawIds = SpreadsheetApp.openById(top.rbTrackerId)
   .getSheetByName("Reportbooks")
   .getRange("A2:A").getValues();
   //Logger.log(raw_ids);
   
-  var clean_ids = [];
-  for (var i in raw_ids) {
-    var this_id = raw_ids[i][0];
-    //Logger.log(this_id);
-    if (this_id.length > 2) {
+  var cleanIds = [];
+  for (var i=0; i < rawIds.length; i++) {
+    var thisId = rawIds[i][0];
+    //Logger.log(thisId);
+    if (thisId.length > 2) {
       //Logger.log("Clean");
-      clean_ids.push(this_id);
+      cleanIds.push(thisId);
     }
   }
   //Logger.log(clean_ids);
-  return clean_ids;
+  return cleanIds;
 }
 
 function listCoursesForTom() {

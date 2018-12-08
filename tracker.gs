@@ -214,7 +214,7 @@ function getStudents() {
 }
 
 function initialiseStudents() {
-  console.log ("Initialising students list");
+  console.warn ("Initialising students list");
   var students = [];
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   var rb = SpreadsheetApp.openById(top.rbTrackerId);

@@ -3,7 +3,10 @@
 // Portfolio spreadsheet (and maybe to a text report, who knows?
 // =============================================================
 
-var exportOverride = false;
+// "ALL"  = export all, regardless
+// "Y"    = export records marked Y
+// "NONE" = dry run (for error log)
+var exportOverride = "NONE";
 
 function createTestStudent() {
     createStudentFullInfo(bobby);
@@ -62,7 +65,7 @@ function exportAllRBs() {
   console.warn("exportAllRBs: STARTED " + startTime );
   
   for (var r = 0; r<rbIds.length; r++) {
-    if (r > 2) break;
+    // if (r > 2) break;
     
     var rbId = rbIds[r];
     var rbss = SpreadsheetApp.openById(rbId);
@@ -73,7 +76,7 @@ function exportAllRBs() {
     exportStudentsFromRB(rbss);
   }
   var endTime = new Date();
-  var elapsedTime = endTime - startTime;
+  var elapsedTime = (endTime - startTime)/1000;
   console.warn("exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
 }
 
@@ -83,30 +86,37 @@ function exportStudentsFromRB(rbss) {
   var srcName = rbss.getName();
   var owner = rbss.getOwner();
   var len = srcName.length;
+  var subYear = srcName.substring(0,len-11);
   var tabName = srcName.substring(0,len-15);
   var sub = tabName.substring(0, 3);
   //var students = getStudents();
   
-  console.warn("Exporting %s to tab [%s] for %s", srcName, tabName, owner, meta);
+  console.warn("[%s] Exporting for %s", subYear, owner);
   
   var gradeSheet = rbss.getSheetByName("Grades");
   
   // TODO: v2 use these to update the portfolio directly?
   var titles = gradeSheet.getRange("A3:X3").getValues();
   var maxScores = gradeSheet.getRange("A4:X4").getValues();
-  var classAverages = gradeSheet.getRange("A6:X6").getValues();
-  console.log(titles, maxScores, classAverages);
+  var classAverages = gradeSheet.getRange("A6:X6").getFormulas();
+  
   // check for missing max & average in REP columns
-  for (var c = 8; c < titles.length; c++) {
+  for (var c = 8; c < titles[0].length; c++) {
     var title = titles[0][c];
     var maxScore = maxScores[0][c];
     var avg = classAverages[0][c];
     
-    console.log("title: %s maxScore: %s avg: %s", title, maxScore, avg);
-//    if (title  != "" && title {
-//      if (title 
-      
-//    }
+    //console.log("title: %s maxScore: %s avg: %s", title, maxScore, avg);
+    if (title != "" && title.indexOf("REP") > -1) {
+      if (maxScore == "") {
+        console.warn("[%s] Max score required for %s", 
+                     subYear, title);
+      }
+      if (avg == "") {
+        console.warn("[%s] Average score formula required for %s", 
+                     subYear, title);
+      }  
+    }
   }
   var rows = gradeSheet.getRange("A7:AB46").getValues();
   var replacementRows = [];
@@ -122,8 +132,7 @@ function exportStudentsFromRB(rbss) {
   if (yesRows.length > 0) {
     updateGradeFormulas(rbss);
   } 
-  console.info("%d rows marked Y %s", yesRows.length, exportOverride ? " but OVERRIDE=true" : "", meta);
-//  logIt("Rows marked for export:" + yesRows.length + exportOverride ? " OVERRIDE" : "", meta);
+  //console.log("%d rows marked Y %s", yesRows.length, exportOverride == "ALL" ? " but OVERRIDE=true" : "", meta);
     
   // loop through students marked for export ie col Z="Y":
   for (var r=0; r<rows.length; r++) {
@@ -132,15 +141,20 @@ function exportStudentsFromRB(rbss) {
     
     //   open student.fileid from RB Tracker
     var row = rows[r];
-    var rowLastname  = row[0];
-    var rowFirstname = row[1];
-    var rowEmail     = row[2]; // col C, 0-based
-    var rowFullname  = row[3];
     
-    var rowComment = row[24]; // col Y
-    var rowTimestamp = row[25];
+    var rowLastname   = row[0];
+    var rowFirstname  = row[1];
+    var rowEmail      = row[2]; // col C, 0-based
+    var rowFullname   = row[3];
+    
+    var rowAvgGrade   = row[5];
+    var rowAvgPercent = row[6];
+    var rowGrades     = row.slice(7, 23);
+    
+    var rowComment    = row[24]; // col Y
+    var rowTimestamp  = row[25];
     var rowExportTabs = row[26];
-    var rowExportYN = row[27]; // col AB
+    var rowExportYN   = row[27]; // col AB
     
     replacementRows.push([
       rowTimestamp, 
@@ -150,22 +164,47 @@ function exportStudentsFromRB(rbss) {
     
     
     if (rowEmail == "") {
-      console.log("Row %d no email - skipping", r, meta);
-      //logIt(rowEmail, meta);
 
       if (rowLastname != "") { // student has last name
-        console.warn("ERROR %s student has name (%s %s) but no email", srcName, rowFirstname, rowLastname, meta);
+        console.warn("[%s] EMAIL? %s %s missing email", 
+                     subYear, rowFullname);
         
         // Fullname formula missing
         if (rowFirstname + " " + rowLastname != rowFullname) {
-          console.warn("Fullname formula missing in col C: %s != %s+%s in %s", rowFullname, rowFirstname, rowLastname, srcName, meta);
+          console.warn("[%s] FORMULA? Fullname formula missing in col C: %s != %s+%s in %s", 
+                       subYear, rowFullname, rowFirstname, rowLastname);
         }
       }
 
-    } else {
-      if (["Y", "y"].indexOf(rowExportYN) > -1 || exportOverride) { 
+    } else { // row has an email
+      
+      if (exportOverride == "ALL" || ["Y", "y"].indexOf(rowExportYN) > -1) { 
         
-        console.log("  Row %d: %s %s (%s)", r, rowFirstname, rowLastname, rowEmail, meta);
+        console.log("[%s] STARTING: %s (%s)", 
+                    subYear, rowFullname, rowEmail);
+        
+        // count grades entered...
+        var rowScores = [];
+        for (var g = 0; g < rowGrades.length; g++) {
+          if (rowGrades[g] != "") {
+            rowScores.push(rowGrades[g]); 
+          }
+        }
+        
+        // ... 3 or fewer grades ?
+        if (rowScores.length <= 3) {
+          console.warn('[%s] FEW? %s has %s grades', 
+                       subYear, rowFullname, rowScores.length.toString());
+        }
+        
+        // ... average score less than 30% ?
+        if (rowAvgPercent < 0.30) {
+          console.warn("[%s] LOW? %s graded %s (%s = %s)", 
+                       subYear, rowFullname, 
+                       rowAvgGrade,  
+                       Math.round(rowAvgPercent*100), 
+                       rowScores.join(" + ")); 
+        }
         
         var student = getStudentByEmail(rowEmail);
         
@@ -174,13 +213,13 @@ function exportStudentsFromRB(rbss) {
           portfolioFile = SpreadsheetApp.openById(student.fileid);
         }
         catch(e) {
-          console.error("Failed to open file for " + student.email + ", error: " + e);           
+          console.error("[%s] FILE? %s, error: ", 
+                        subYear, student.email, e);           
         }
         
         if (portfolioFile != "") {
-          console.log("Exporting %s", student.fullname, meta);
           
-          //   if not exists sheet(sub):
+          //  if not exists sheet(sub):
           var tabExists = portfolioFile.getSheetByName(tabName) != null;
           var portfolioSheet; 
           
@@ -190,68 +229,67 @@ function exportStudentsFromRB(rbss) {
             logIt(tabName + " already exists", meta);
             portfolioSheet = portfolioFile.getSheetByName(tabName);
           }
-          //logIt(template, meta);
-          //logIt(template.reportsSheetName, meta);
           
-          // set Full Name
-          var rbRepSheet = rbss.getSheetByName(template.reportsSheetName);
-          rbRepSheet.getRange("B4").setValue(student.fullname);
+          if ( exportOverride != "NONE" ) {
+            // set Full Name
+            var rbRepSheet = rbss.getSheetByName(template.reportsSheetName);
+            rbRepSheet.getRange("B4").setValue(student.fullname);
+            
+            // copy grades data
+            var titlesAndPercentages = rbRepSheet.getRange("B4:U8").getValues();
+            portfolioSheet.getRange("B4:U8").setValues(titlesAndPercentages);
+            
+            var letterGrades = rbRepSheet.getRange("B10:U11").getValues();
+            portfolioSheet.getRange("B10:U11").setValues(letterGrades);
+            
+            // wipe out GPA (for now)
+            portfolioSheet.getRange("C6:C11").setValue("");
+            
+            // add Comment
+            portfolioSheet.getRange("I4").setValue(rowComment);
+            
+            // clear out unused Titles
+            updateValues(portfolioSheet, "F6:6", ["Title"], [""]);
+            
+            // TODO add tabs list
+            var tabsList = [];
+            tabsList = portfolioFile.getSheets().map(function(sheet) {
+              return [sheet.getName()];
+            });
+            
+            // update timestamp, uncheck YN, etc
+            // add datestamp
+            var newTimestamp = "" + new Date();
+            var newExportTabs = tabsList.join(", ");
+            var newExportYN = exported ? "Y" : "N";
+            var url = portfolioFile.getUrl();
+            url += '#gid=';
+            url += portfolioSheet.getSheetId();
+            var newExportTabsLink = '=HYPERLINK("' + 
+              url + '", "' + 
+                student.fullname + " " + tabName + 
+                  '")';
+            
+            //logIt([rowTimestamp, rowExportTabs, rowExportYN], meta);
+            //console.log([r, newTimestamp, newExportTabs, newExportYN], meta);
+            
+            replacementRows[r] = [[
+              newTimestamp, 
+              newExportTabsLink,
+              newExportYN
+            ]];
+            gradeSheet.getRange(r+7, 26, 1, 3).setValues(replacementRows[r]);
+            
+            // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
+            
+          }
           
-          // copy grades data
-          var titlesAndPercentages = rbRepSheet.getRange("B4:U8").getValues();
-          portfolioSheet.getRange("B4:U8").setValues(titlesAndPercentages);
-          
-          var letterGrades = rbRepSheet.getRange("B10:U11").getValues();
-          portfolioSheet.getRange("B10:U11").setValues(letterGrades);
-          
-          // wipe out GPA (for now)
-          portfolioSheet.getRange("C6:C11").setValue("");
-          
-          // add Comment
-          portfolioSheet.getRange("I4").setValue(rowComment);
-          
-          // clear out unused Titles
-          updateValues(portfolioSheet, "F6:6", ["Title"], [""]);
-          
-          // TODO add tabs list
-          var tabsList = [];
-          tabsList = portfolioFile.getSheets().map(function(sheet) {
-            return [sheet.getName()];
-          });
-          
-          // update timestamp, uncheck YN, etc
-          // add datestamp
-          var newTimestamp = "" + new Date();
-          var newExportTabs = tabsList.join(", ");
-          var newExportYN = exported ? "Y" : "N";
-          var url = portfolioFile.getUrl();
-          url += '#gid=';
-          url += portfolioSheet.getSheetId();
-          var newExportTabsLink = '=HYPERLINK("' + 
-            url + '", "' + 
-              student.fullname + " " + tabName + 
-                '")';
-          
-          //logIt([rowTimestamp, rowExportTabs, rowExportYN], meta);
-          //console.log([r, newTimestamp, newExportTabs, newExportYN], meta);
-          
-          replacementRows[r] = [[
-            newTimestamp, 
-            newExportTabsLink,
-            newExportYN
-          ]];
-          gradeSheet.getRange(r+7, 26, 1, 3).setValues(replacementRows[r]);
-          
-          // TODO clear out zero% in IndRep formulas
-          
-          // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
-          
-          // TODO add without comments
-          // TODO add SUB with comments
         } else {
           var newTimestamp = "" + new Date();
+          console.log("No Portfolio, ignored");
           gradeSheet.getRange(r+7, 26, 1, 3).setValues([[newTimestamp, "No Portfolio, ignored", "N"]]);
         }
+        console.log("FINISHED: %s to %s", student.fullname, url);
       }
     }
   }
@@ -289,7 +327,9 @@ function orderTabs(ss) {
 
 function addSubTemplate(student, tabName) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
-
+  Logger.log(student);
+  Logger.log(subYear);
+  
   if (tabName === undefined) {
     tabName = "SUB"
   }
@@ -313,7 +353,7 @@ function addSubTemplate(student, tabName) {
     logIt("Tab " + tabName + " already exists, just update it", meta, "C");
     
   } else {
-    logIt("Tab " + student.fullname + " " + tabName + " does not exist. Creating...", meta, "C");
+    logIt(student.fullname + ": tab " + tabName + " does not exist. Creating...", meta, "C");
     subSheet = subjectSheetTemplate.copyTo(portfolioFile);
     subSheet.setName(tabName);
   }

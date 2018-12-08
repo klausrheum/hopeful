@@ -11,8 +11,24 @@
 //};
 //Logger.log(COLS.COMMENT);
 
+
 function updatePortfolios() {
- // add days absent & late 
+  // add attendance
+  // add Cheryl's blurb
+  // copy Pastoral Comment, sometimes, extra-curric & absent to RB Tracker
+  
+  for (var i=0; i < top.students.length; i++) {
+    var student = top.students[i];
+    // SAFETY CATCH =============================
+    
+    if (i>2) break; // stop after two reportbooks
+    
+    // END SAFETY CATCH =========================
+    var id = student.fileid;
+    var ss = SpreadsheetApp.openById(id);
+    console.info("Updating " + ss.getName());
+    
+  }
 }
 
 function updateReportbooks() {
@@ -23,7 +39,7 @@ function updateReportbooks() {
   var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
   var csc10 = "1jI0UpPD9Imz9SUXwcRUI8CaucrHuKhOg_Mi5GQJKJFI";
   //var rbIds = [csc10];
-
+  
   for (var i=0; i < rbIds.length; i++) {
     
     // SAFETY CATCH =============================
@@ -69,7 +85,7 @@ function updateCommentsColumn(ss) {
     sheet.insertColumnBefore(lastCol);
     lastCol ++;
   }
-   
+  
   // if column 25 isn't 'Comment', make it so
   var title = sheet.getRange(3, 25).getValue();
   Logger.log(title);
@@ -102,10 +118,10 @@ function updateExportColumns(ss) {
     sheet.insertColumnAfter(sheet.getLastColumn());
     lastCol ++;
   }
-
+  
   sheet.getRange("Y:AB")
   .setBorder(null, true, null, true, true, null, '#999999', SpreadsheetApp.BorderStyle.SOLID);
-
+  
   sheet.getRange("Z1:AB5")
   .setBackground("#e8eaf6")
   .setFontColor("#303f9f");
@@ -131,20 +147,20 @@ function updateExportColumns(ss) {
   .build();
   
   sheet.getRange("AB7:AB46").setDataValidation(checkboxValidation); 
-
+  
   sheet.setColumnWidth(28, 50);
   sheet.getRange('AB3').setValue('Export Y / N');
   
-//  Logger.log("Setting checkboxes");
-//  ss.getRange('AB7:AB')
-//  .setDataValidation(checkBoxes);
+  //  Logger.log("Setting checkboxes");
+  //  ss.getRange('AB7:AB')
+  //  .setDataValidation(checkBoxes);
   
   sheet.getRange("Y:AA")
   .setHorizontalAlignment("left");
   
   sheet.getRange("Z7:Z")
   .setNumberFormat('h PM, ddd mmm dd');
-
+  
   sheet.getRange("Z7:AA")      // date and tabs
   .setHorizontalAlignment("left")
   .setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
@@ -165,7 +181,7 @@ function updateConditionalFormatting(ss) {
   .whenTextEqualTo('y')
   .setBackground('#FF00FF')
   .build());
-   ss.getActiveSheet().setConditionalFormatRules(conditionalFormatRules);
+  ss.getActiveSheet().setConditionalFormatRules(conditionalFormatRules);
 }
 
 function updateFreezeRows(ss) {
@@ -180,7 +196,10 @@ function testUpdateValues() {
 }
 
 function updateValues(sheet, rangeA1, oldValues, newValues) {
-  if (oldValues.length != newValues.length) throw "newValues must be same length as oldValues";
+  if (oldValues.length != newValues.length) {
+    throw "newValues must be same length as oldValues";
+  }
+  
   var data = sheet.getRange(rangeA1).getValues();
   Logger.log("updateValues: " + data);
   for (var r = 0; r < data.length; r++) {
@@ -201,7 +220,7 @@ function updateValues(sheet, rangeA1, oldValues, newValues) {
 
 
 function updateRBFormulas(ss) {
-
+  
   var formulas = [
     {
       // F6=if(istext(A6), index(Grades, match($G6*100,GradeRange,-1), 1),"")
