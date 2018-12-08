@@ -6,7 +6,7 @@
 // "ALL"  = export all, regardless
 // "Y"    = export records marked Y
 // "NONE" = dry run (for error log)
-var exportOverride = "NONE";
+var exportOverride = "Y";
 
 function createTestStudent() {
     createStudentFullInfo(bobby);
@@ -91,7 +91,7 @@ function exportStudentsFromRB(rbss) {
   var sub = tabName.substring(0, 3);
   //var students = getStudents();
   
-  console.warn("[%s] Exporting for %s", subYear, owner);
+  console.warn("[%s] >>> Exporting for %s", subYear, owner);
   
   var gradeSheet = rbss.getSheetByName("Grades");
   
@@ -166,7 +166,7 @@ function exportStudentsFromRB(rbss) {
     if (rowEmail == "") {
 
       if (rowLastname != "") { // student has last name
-        console.warn("[%s] EMAIL? %s %s missing email", 
+        console.warn("[%s] EMAIL? %s missing email", 
                      subYear, rowFullname);
         
         // Fullname formula missing
@@ -193,17 +193,19 @@ function exportStudentsFromRB(rbss) {
         
         // ... 3 or fewer grades ?
         if (rowScores.length <= 3) {
-          console.warn('[%s] FEW? %s has %s grades', 
-                       subYear, rowFullname, rowScores.length.toString());
+          console.warn(
+            '[%s] FEW? %s grade(s) - %s',
+            subYear, rowScores.length.toString(), rowFullname);
         }
         
         // ... average score less than 30% ?
         if (rowAvgPercent < 0.30) {
-          console.warn("[%s] LOW? %s graded %s (%s = %s)", 
-                       subYear, rowFullname, 
-                       rowAvgGrade,  
-                       Math.round(rowAvgPercent*100), 
-                       rowScores.join(" + ")); 
+          console.warn(
+            "[%s] LOW? %s graded %s (%s = %s)", 
+            subYear, rowFullname, 
+            rowAvgGrade,  
+            Math.round(rowAvgPercent*100), 
+            rowScores.join(" + ")); 
         }
         
         var student = getStudentByEmail(rowEmail);
