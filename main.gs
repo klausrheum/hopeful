@@ -28,26 +28,33 @@ var top = {
   },
   
   SHEETS: {
-    "TITLESROW" : 3,
-    "OVERVIEW": "Overview",
-    "GRADES": "Grades",
-    "INDREP": "Individual report", // NB small 'r'
+    TITLESROW : 3,
     
-    "ADMIN": "Admin",
-    "PASTORAL": "Pastoral",
-    "SUB": "Sub"
+    REPORTBOOKS: "Reportbooks",
+    PORTFOLIOS: "Portfolios",
+    PROBLEMLOG: "ProblemLog",
+    
+    OVERVIEW: "Overview",
+    GRADES: "Grades",
+    INDREP: "Individual report", // NB small 'r'
+    
+    ADMIN: "Admin",
+    PASTORAL: "Pastoral",
+    SUB: "Sub"
   },
   
   COLS: {
-    'LASTNAME': 1,
-    'FIRSTNAME': 2,
-    'EMAIL': 3,
-    'FULLNAME': 4,
-    'YEAR': 5,
-    'FILENAME': 6,
-    'FILEID': 7,
-    'LINK': 8,
-    'TABS': 9
+    LASTNAME: 1,
+    FIRSTNAME: 2,
+    EMAIL: 3,
+    FULLNAME: 4,
+    YEAR: 5,
+    FILENAME: 6,
+    FILEID: 7,
+    LINK: 8,
+    TABS: 9,
+    
+    IDSTOEXPORT: 12
   }
 };
 

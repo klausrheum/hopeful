@@ -7,10 +7,11 @@
 // "Y"    = export records marked Y
 // "NONE" = dry run (for error log)
 
-var exportOverride = "Y";
+var exportOverride = "ALL";
 var studentsToUpdate = [
   //"prashansa.abraham@students.hope.edu.kh",
   //"gabriel.wolthuis@students.hope.edu.kh"
+  //"chun-ya.huang@students.hope.edu.kh"
 ]; // or []
 
 if (studentsToUpdate != []) {
@@ -20,12 +21,30 @@ if (studentsToUpdate != []) {
 function exportAllRBs() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
+  var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
+  Logger.log(rbTracker.getName());
+  var rbSheet = rbTracker.getSheetByName(top.SHEETS.REPORTBOOKS);
+  var lastRow = rbSheet.getLastRow();
+  
+  var rawIds = rbSheet.getRange(2, top.COLS.IDSTOEXPORT, lastRow, 1).getValues();
+  var idsToExport = [];
+  var thisId;
+  for (var i = 0; i < rawIds.length; i++) {
+    thisId = rawIds[i][0];
+    if (thisId.length > 0) {
+      idsToExport.push(thisId); 
+    }
+  }
+  
+  Logger.log (idsToExport);
+
   var rbIds = getRbIds();
+  
   var aaa99 = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
   var phy09 = "1KeLj6BLp_-_sJZ5FUtuR477C9N9Do1audaQ_Py73iI0";
   var bio10 = "1mYLsiGW_mkFlFnpWBQVp1dk26OyA3b7XEMbo49JKST0";
   var engib = "1_BgA4Y2t49eoQdpXyZkZ70sTuUHd1EoMmD6y9bvAsfM";
-  var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
+  var eli09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
   var spa12 = "11cztmZuO_8XZy6valpY-HbQr4S_qBXpbTi6lmdTxhVo";
   var cpe11 = "1lyxNjnINRMDZ7vY86L3HchdoGO_yZ724zBR-yFVV318";
   // var rbIds = [cpe11];
@@ -38,12 +57,19 @@ function exportAllRBs() {
     //if (r > 2) break;
     
     var rbId = rbIds[r];
-    var rbss = SpreadsheetApp.openById(rbId);
-    var rbName = rbss.getName();
-    
-    //console.warn("Starting %s ", rbName);
-    
-    exportStudentsFromRB(rbss);
+
+    if (idsToExport.indexOf(rbId) == -1) {
+      //console.info("Skipping %s", rbId);
+      continue;
+      
+    } else {
+      //console.info("%s is ticked for export", rbId);
+      var rbss = SpreadsheetApp.openById(rbId);
+      var rbName = rbss.getName();
+
+      exportStudentsFromRB(rbss);
+
+    }
   }
   
   var endTime = new Date();
@@ -123,7 +149,7 @@ function updateIndividualReportTab(ss) {
   indRepSheet.getRange("B6:X11")
   .setHorizontalAlignment("left")
   .setVerticalAlignment("bottom");
-  SpreadsheetApp.flush();
+  //SpreadsheetApp.flush();
   
   createChart(indRepSheet);
 }
@@ -245,7 +271,7 @@ function exportStudentsFromRB(rbss) {
 
     } else { // row has an email
       
-      if (studentsToUpdate != []) {
+      if (studentsToUpdate.length > 0) {
         if (studentsToUpdate.indexOf(rowEmail) == -1) {
           continue;
         }
@@ -265,8 +291,8 @@ function exportStudentsFromRB(rbss) {
           }
         }
         
-        // ... 3 or fewer grades ?
-        if (rowScores.length <= 3) {
+        // ... 2 or fewer grades ?
+        if (rowScores.length <= 2) {
           console.info(
             '[%s] FEW? %s grade(s) - %s',
             subYear, rowScores.length.toString(), rowFullname);

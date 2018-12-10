@@ -15,8 +15,6 @@ var OLD = 0;
 var NEW = 1;
 
 function updatePortfolios() {
-  // add attendance
-  // add Cheryl's blurb
   // copy Pastoral Comment, sometimes, extra-curric & absent to RB Tracker
   
   version = OLD;
@@ -58,12 +56,7 @@ function backupPortfolio(ss) {
   
   // UNFINISHED - DO NOT USE //
   
-  var pastoral = {
-    "studentname": ["B4", "B4"],
-    "comment": ["B20", "B7"],
-    "extra": ["B8", "B12"],
-    "attributes": ["C10:C18", "C15:C23"]
-  }
+  var pastoral = "B1:B21"
 
   var sheet = ss.getSheetByName("Pastoral");
   var raw = sheet.getDataRange().getValues();
