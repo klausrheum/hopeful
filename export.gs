@@ -27,7 +27,7 @@ function exportAllRBs() {
     "exportAllRBs: STARTED " + startTime );
   
   for (var r = 0; r<rbIds.length; r++) {
-    // if (r > 2) break;
+    if (r > 2) break;
     
     var rbId = rbIds[r];
     var rbss = SpreadsheetApp.openById(rbId);
@@ -54,26 +54,66 @@ function deleteTestStudent() {
     deleteStudent(bobby);
 }
 
-function testupdateGradeFormulas() {
-  var aaaId = "1cLCGk3RBa-Y5zqf7CT8GEwDRD-GtJBOka7_41NUsi5U";
+function test_updateIndividualReport() {
+  var aaaId = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
+  var mat09 = "1SQNPHhjrMYbpxJ3d7nN8vcMH4teF_DPGdsWxg4655Sc";
   var aaaSs = SpreadsheetApp.openById(aaaId);
-  updateGradeFormulas( aaaSs );
+  
+  // clear B1: ICT Year 9 (Mr Kershaw)
+  aaaSs
+  .getSheetByName("Individual report")
+  .getRange("B11").clear();
+  
+  // clear B10: =B7
+  aaaSs
+  .getSheetByName("Individual report")
+  .getRange("B10").clear();
+  
+  updateIndividualReport( aaaSs );
+  
+  var val = aaaSs
+  .getSheetByName("Individual report")
+  .getRange("B10").getFormula();
+  
+  // B1 should now contain ICT Year 9 (Mr Kershaw)
+  if (val.indexOf("(") == -1) {
+    console.error("FAIL: updateGradeFormulas cell B1");
+  }
+
+  // B10 should now contain =B7 
+  if (val != "=B7") {
+    console.error("FAIL: updateGradeFormulas cell B10");
+  }
 }
 
-function updateGradeFormulas(ss) {
+function updateIndividualReport(ss) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   
-  // TODO DELETE var rbTemplatesFileId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
   var templateSs = SpreadsheetApp.openById(top.rbTemplatesId);
-  var sheet = templateSs.getSheetByName("SUB");
-  var formulas = sheet.getRange("A10:AC11").getFormulas();
+  // var rBName = ss.getName();
+  // TODO DELETE var rbTemplatesFileId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
   
-  var portfolioName = ss.getName();
-  var indRepSheet = ss.getSheetByName("Individual Report");
-  indRepSheet.getRange("A10:AC11").setFormulas(formulas);  
+  var temSubSheet = templateSs.getSheetByName("SUB");
+  var indRepSheet = ss.getSheetByName("Individual report");
+  var formulas, styles;
+  
+  formulas = temSubSheet.getRange("A10:P11").getFormulas();
+  indRepSheet.getRange("A10:P11").setFormulas(formulas);
+  indRepSheet.getRange("B10:B11").setFormulas([["=B7"],["=B8"]])  
+  Logger.log(formulas);
+  
+  formulas = temSubSheet.getRange("B1:B1").getFormulas();
+  indRepSheet.getRange("B1:B1").setFormulas(formulas);  
+  
+  styles = temSubSheet.getRange("B1:B1").getTextStyles();
+  indRepSheet.getRange("B1:B1").setTextStyles(styles);  
+  
+  indRepSheet.getRange("B6:X11").setHorizontalAlignment("left");
+  
+  createChart(indRepSheet);
 }
 
-function textAAAExport() {
+function text_AAAExport() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   
   var rbIds = getRbIds();
@@ -139,8 +179,9 @@ function exportStudentsFromRB(rbss) {
   );
   
   if (yesRows.length > 0) {
-    updateGradeFormulas(rbss);
+    updateIndividualReport(rbss);
   } 
+  
   //console.log("%d rows marked Y %s", yesRows.length, exportOverride == "ALL" ? " but OVERRIDE=true" : "", meta);
     
   // loop through students marked for export ie col Z="Y":
@@ -250,8 +291,8 @@ function exportStudentsFromRB(rbss) {
             rbRepSheet.getRange("B4").setValue(student.fullname);
             
             // copy grades data
-            var titlesAndPercentages = rbRepSheet.getRange("B4:U8").getValues();
-            portfolioSheet.getRange("B4:U8").setValues(titlesAndPercentages);
+            var titlesAndPercentages = rbRepSheet.getRange("B1:U8").getValues();
+            portfolioSheet.getRange("B1:U8").setValues(titlesAndPercentages);
             
             var letterGrades = rbRepSheet.getRange("B10:U11").getValues();
             portfolioSheet.getRange("B10:U11").setValues(letterGrades);
@@ -313,15 +354,6 @@ function exportStudentsFromRB(rbss) {
   // gradeSheet.getRange("Z7:AB46").setValues(replacementRows);
   
 }
-
-function testAddSubTemplate() {
-  var meta = {'tag': arguments.callee.name, "dest": "L"};
-
-  var student = getStudentByEmail("thomas.norman@students.hope.edu.kh");
-  var newSheet = addSubTemplate(student);
-  logIt(newSheet, meta);
-}
-
 
 function copyPastoralToAdmin() {  
   
@@ -421,6 +453,15 @@ function copySheet(srcId, destId, srcName, destName, replace) {
   destSheet.setName(destName);
   return destSheet;
 }
+
+function test_addSubTemplate() {
+  var meta = {'tag': arguments.callee.name, "dest": "L"};
+
+  var student = getStudentByEmail("thomas.norman@students.hope.edu.kh");
+  var newSheet = addSubTemplate(student);
+  logIt(newSheet, meta);
+}
+
 
 function addSubTemplate(student, tabName) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
