@@ -89,7 +89,7 @@ function updateReportbooks() {
     
     // SAFETY CATCH =============================
     
-    //if (i>2) break; // stop after two reportbooks
+    if (i>2) break; // stop after two reportbooks
     
     // END SAFETY CATCH =========================
     
@@ -102,7 +102,7 @@ function updateReportbooks() {
     //    updateFreezeRows(ss);
     //    updateRBFormulas(ss);
     //    updateDeleteUnusedDatesAndTitles(ss);
-    // updateGradeScale(ss);
+    updateGradeScale(ss);
     // updateConditionalFormatting(ss); // doesn't work in this scope :(
     
     //   sheet(report)
@@ -316,16 +316,44 @@ function updateFormulas(ss, formulas) {
   }
 }
 
-function updateGradeScale(ss) {
-  var sheet = ss.getSheetByName(template.overviewSheetName);
-  var aplus = sheet.getRange("B8").getValue();
+
+function test_updateGradeScales() {
+  // destination sheet
+  Logger.log(top.FILES.AAA);
+  var testSS = SpreadsheetApp.openById( top.FILES.AAA );
+  Logger.log (testSS.getName() );
+  var testSheet = testSS.getSheetByName( top.SHEETS.OVERVIEW );
   
-  if (aplus != 80) {
-    Logger.log("Old scale: " + ss.getName() );
-  } else {
-    //Logger.log("Scale okay: " + ss.getName() );
-  }
+  // clear scale from template SubY00 / Overview
+  testSheet.getRange("B8:B22").clear();
+  testSheet.getRange("D9:D22").clear();
+  
+  updateGradeScale(testSS);
 }
+
+function updateGradeScale(ss) {
+  // source sheet
+  var templateSS = SpreadsheetApp.openById( top.FILES.SUBY00 );
+  var templateSheet = templateSS.getSheetByName( top.SHEETS.OVERVIEW );
+
+  // destination sheet
+  var destSheet = ss.getSheetByName( top.SHEETS.OVERVIEW );
+  
+  // get scale from template SubY00 / Overview
+  var start_boundary = templateSheet.getRange("B8:B22").getValues();
+  var end_boundary = templateSheet.getRange("D9:D22").getFormulas();
+  var colors = templateSheet.getRange("B8:D22").getBackgrounds();
+  var styles = templateSheet.getRange("B8:D22").getTextStyles();
+  var alignments = templateSheet.getRange("B8:D22").getHorizontalAlignments();
+  
+  // paste to current RB / Overview
+  destSheet.getRange("B8:B22").setValues(start_boundary);
+  destSheet.getRange("D9:D22").setFormulas(end_boundary);
+  destSheet.getRange("B8:D22").setBackgrounds(colors);
+  destSheet.getRange("B8:D22").setTextStyles(styles);
+  destSheet.getRange("B8:D22").setHorizontalAlignments(alignments);
+}
+
 
 function exportButton() {
   // sheet = "Individual report";

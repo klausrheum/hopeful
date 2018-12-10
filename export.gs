@@ -8,6 +8,14 @@
 // "NONE" = dry run (for error log)
 
 var exportOverride = "Y";
+var studentsToUpdate = [
+  //"prashansa.abraham@students.hope.edu.kh",
+  //"gabriel.wolthuis@students.hope.edu.kh"
+]; // or []
+
+if (studentsToUpdate != []) {
+  exportOverride = "ALL";
+}
 
 function exportAllRBs() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
@@ -19,15 +27,15 @@ function exportAllRBs() {
   var engib = "1_BgA4Y2t49eoQdpXyZkZ70sTuUHd1EoMmD6y9bvAsfM";
   var englit09 = "1qvEbFGLUMEAxGfk0Bmfnb1Y5nvUGMICWPdNcCXQ9__E";
   var spa12 = "11cztmZuO_8XZy6valpY-HbQr4S_qBXpbTi6lmdTxhVo";
-  
-  //var rbIds = [spa12];
+  var cpe11 = "1lyxNjnINRMDZ7vY86L3HchdoGO_yZ724zBR-yFVV318";
+  // var rbIds = [cpe11];
   var startTime = new Date();
   
   console.warn(
     "exportAllRBs: STARTED " + startTime );
   
   for (var r = 0; r<rbIds.length; r++) {
-    if (r > 2) break;
+    //if (r > 2) break;
     
     var rbId = rbIds[r];
     var rbss = SpreadsheetApp.openById(rbId);
@@ -69,7 +77,7 @@ function test_updateIndividualReport() {
   .getSheetByName("Individual report")
   .getRange("B10").clear();
   
-  updateIndividualReport( aaaSs );
+  updateIndividualReportTab( aaaSs );
   
   var val = aaaSs
   .getSheetByName("Individual report")
@@ -86,15 +94,20 @@ function test_updateIndividualReport() {
   }
 }
 
-function updateIndividualReport(ss) {
+function updateIndividualReportTab(ss) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
+  var rbName = ss.getName();
+  Logger.log(rbName);
   
-  var templateSs = SpreadsheetApp.openById(top.rbTemplatesId);
-  // var rBName = ss.getName();
+  var templateSs = SpreadsheetApp.openById(top.FILES.RBTEMPLATES);
+  var temName = templateSs.getName();
+  Logger.log(temName);
+  
   // TODO DELETE var rbTemplatesFileId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
   
-  var temSubSheet = templateSs.getSheetByName("SUB");
-  var indRepSheet = ss.getSheetByName("Individual report");
+  var temSubSheet = templateSs.getSheetByName(top.SHEETS.SUB);
+  var indRepSheet = ss.getSheetByName(top.SHEETS.INDREP);
+  Logger.log(indRepSheet.getName());
   var formulas, styles;
   
   formulas = temSubSheet.getRange("A10:P11").getFormulas();
@@ -102,13 +115,15 @@ function updateIndividualReport(ss) {
   indRepSheet.getRange("B10:B11").setFormulas([["=B7"],["=B8"]])  
   Logger.log(formulas);
   
-  formulas = temSubSheet.getRange("B1:B1").getFormulas();
-  indRepSheet.getRange("B1:B1").setFormulas(formulas);  
+  indRepSheet.getRange("B1:B1").setFormula('=Overview!B1 & " (" & Overview!B2 & ")"');  
   
   styles = temSubSheet.getRange("B1:B1").getTextStyles();
   indRepSheet.getRange("B1:B1").setTextStyles(styles);  
   
-  indRepSheet.getRange("B6:X11").setHorizontalAlignment("left");
+  indRepSheet.getRange("B6:X11")
+  .setHorizontalAlignment("left")
+  .setVerticalAlignment("bottom");
+  SpreadsheetApp.flush();
   
   createChart(indRepSheet);
 }
@@ -178,9 +193,10 @@ function exportStudentsFromRB(rbss) {
     }
   );
   
-  if (yesRows.length > 0) {
-    updateIndividualReport(rbss);
-  } 
+  // perform once per RB, not once per student!
+  //if (yesRows.length > 0 || ) {
+    updateIndividualReportTab(rbss);
+  //} 
   
   //console.log("%d rows marked Y %s", yesRows.length, exportOverride == "ALL" ? " but OVERRIDE=true" : "", meta);
     
@@ -228,6 +244,12 @@ function exportStudentsFromRB(rbss) {
       }
 
     } else { // row has an email
+      
+      if (studentsToUpdate != []) {
+        if (studentsToUpdate.indexOf(rowEmail) == -1) {
+          continue;
+        }
+      }
       
       if (exportOverride != "Y" || ["Y", "y"].indexOf(rowExportYN) > -1) { 
         
@@ -286,9 +308,11 @@ function exportStudentsFromRB(rbss) {
           }
           
           if ( exportOverride != "NONE" ) {
+            
             // set Full Name
             var rbRepSheet = rbss.getSheetByName(template.reportsSheetName);
             rbRepSheet.getRange("B4").setValue(student.fullname);
+            SpreadsheetApp.flush();
             
             // copy grades data
             var titlesAndPercentages = rbRepSheet.getRange("B1:U8").getValues();

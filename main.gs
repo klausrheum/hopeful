@@ -12,6 +12,32 @@
 // https://developers.google.com/drive/api/v3/reference/files
 
 var top = {
+  "students": [],
+  
+  // search & replace with the FILES entries
+  "rbTrackerId": "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc",
+  "rbTemplatesId": "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys",
+  "SUBY00TemplateId": "17ZJgVhi_SQeoJffFmjdcOFsMp0FRiZVIkjulnmQXJBw",
+  "aaa": "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y", // test reportbook
+
+  FILES: {
+    "RBTRACKER": "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc",
+    "RBTEMPLATES": "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys",
+    "SUBY00": "17ZJgVhi_SQeoJffFmjdcOFsMp0FRiZVIkjulnmQXJBw",
+    "AAA": "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y"
+  },
+  
+  SHEETS: {
+    "TITLESROW" : 3,
+    "OVERVIEW": "Overview",
+    "GRADES": "Grades",
+    "INDREP": "Individual report", // NB small 'r'
+    
+    "ADMIN": "Admin",
+    "PASTORAL": "Pastoral",
+    "SUB": "Sub"
+  },
+  
   COLS: {
     'LASTNAME': 1,
     'FIRSTNAME': 2,
@@ -22,11 +48,7 @@ var top = {
     'FILEID': 7,
     'LINK': 8,
     'TABS': 9
-  },
-  "students": [],
-  "rbTrackerId": "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc",
-  "rbTemplatesId": "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys"
-
+  }
 };
 
 top.students = initialiseStudents();
