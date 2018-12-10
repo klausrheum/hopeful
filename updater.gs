@@ -45,8 +45,7 @@ function updatePortfolios() {
 
 }
 
-function testBackupPortfolio() {
-  var lily = "1-Uj_-YAE1YNtqrxJmiW8cYt5hJQn1lCYvFyYAHMMC4Y";
+function test_backupPortfolio() {
   var ss = SpreadsheetApp.openById(lily);
   version = NEW;
   var data = backupPortfolio(ss);
