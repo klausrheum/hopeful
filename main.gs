@@ -1,4 +1,4 @@
-// export.gs ===================================================
+// main.gs ===================================================
 // holds global objects for various doc IDs, eventually these 
 // will be part of the spreadsheet this is attached to...
 // =============================================================
@@ -54,7 +54,8 @@ var top = {
     LINK: 8,
     TABS: 9,
     
-    IDSTOEXPORT: 12
+    IDSTOEXPORT: 12,
+    EMAILSTOEXPORT: 9
   }
 };
 

@@ -8,35 +8,21 @@
 // "NONE" = dry run (for error log)
 
 var exportOverride = "ALL";
-var studentsToUpdate = [
-  //"prashansa.abraham@students.hope.edu.kh",
-  //"gabriel.wolthuis@students.hope.edu.kh"
-  //"chun-ya.huang@students.hope.edu.kh"
-]; // or []
-
-if (studentsToUpdate != []) {
-  exportOverride = "ALL";
-}
 
 function exportAllRBs() {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
+  
 
-  var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
-  Logger.log(rbTracker.getName());
-  var rbSheet = rbTracker.getSheetByName(top.SHEETS.REPORTBOOKS);
-  var lastRow = rbSheet.getLastRow();
-  
-  var rawIds = rbSheet.getRange(2, top.COLS.IDSTOEXPORT, lastRow, 1).getValues();
-  var idsToExport = [];
-  var thisId;
-  for (var i = 0; i < rawIds.length; i++) {
-    thisId = rawIds[i][0];
-    if (thisId.length > 0) {
-      idsToExport.push(thisId); 
-    }
-  }
-  
+  var idsToExport = getRbIdsToExport();
   Logger.log (idsToExport);
+  
+  var studentsToUpdate = getStudentsToUpdate();  
+  Logger.log (studentsToUpdate);
+  if (studentsToUpdate != []) {
+    exportOverride = "ALL";
+  }
+
+
 
   var rbIds = getRbIds();
   
@@ -67,7 +53,7 @@ function exportAllRBs() {
       var rbss = SpreadsheetApp.openById(rbId);
       var rbName = rbss.getName();
 
-      exportStudentsFromRB(rbss);
+      exportStudentsFromRB(rbss, studentsToUpdate);
 
     }
   }
@@ -78,6 +64,45 @@ function exportAllRBs() {
   console.warn(
     "exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
 }
+
+function getRbIdsToExport() {
+  // build list of RBs ticked for export
+  var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
+  var rbSheet = rbTracker.getSheetByName(top.SHEETS.REPORTBOOKS);
+  var lastRow = rbSheet.getLastRow();
+  
+  var rawIds = rbSheet.getRange(2, top.COLS.IDSTOEXPORT, lastRow, 1).getValues();
+  var idsToExport = [];
+  var thisId;
+  for (var i = 0; i < rawIds.length; i++) {
+    thisId = rawIds[i][0];
+    if (thisId.length > 0) {
+      idsToExport.push(thisId); 
+    }
+  }
+  return idsToExport;
+}
+
+function getStudentsToUpdate() {
+  // build list of students ticked for export
+  var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
+  var pfSheet = rbTracker.getSheetByName(top.SHEETS.PORTFOLIOS);
+  var lastRow = pfSheet.getLastRow();
+  Logger.log (lastRow);
+  
+  var rawIds = pfSheet.getRange(2, top.COLS.EMAILSTOEXPORT, lastRow, 1).getValues();
+  var studentsToUpdate = [];
+  var thisId;
+  for (var i = 0; i < rawIds.length; i++) {
+    thisId = rawIds[i][0];
+    if (thisId.length > 0) {
+      studentsToUpdate.push(thisId); 
+    }
+  }
+  Logger.log(studentsToUpdate);
+  return studentsToUpdate;
+}
+
 
 
 function createTestStudent() {
@@ -164,11 +189,14 @@ function text_AAAExport() {
   var rbId = rbIds[0];
   var rbss = SpreadsheetApp.openById(rbId);
   logIt("Exporting: " + rbId, meta);
+  var studentsToUpdate = [
+    "bobby.tables@students.hope.edu.kh"
+    ];
   
-  exportStudentsFromRB(rbss);
+  exportStudentsFromRB(rbss, studentsToUpdate);
 }
 
-function exportStudentsFromRB(rbss) {
+function exportStudentsFromRB(rbss, studentsToUpdate) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
   var srcName = rbss.getName();
@@ -262,14 +290,15 @@ function exportStudentsFromRB(rbss) {
           "[%s] EMAIL? %s missing email", 
           subYear, rowFullname);
         
-        // Fullname formula missing
-        if (rowFirstname + " " + rowLastname != rowFullname) {
-          console.warn("[%s] FORMULA? Fullname formula missing in col C: %s != %s+%s in %s", 
-                       subYear, rowFullname, rowFirstname, rowLastname);
-        }
       }
-
+      
     } else { // row has an email
+      
+      // Fullname formula missing
+      if (rowFirstname + " " + rowLastname != rowFullname) {
+        console.warn("[%s] FULLNAME? Fullname formula missing in col C: %s != %s+%s in %s", 
+                     subYear, rowFullname, rowFirstname, rowLastname, rowEmail);
+      }
       
       if (studentsToUpdate.length > 0) {
         if (studentsToUpdate.indexOf(rowEmail) == -1) {

@@ -56,7 +56,7 @@ function backupPortfolio(ss) {
   
   // UNFINISHED - DO NOT USE //
   
-  var pastoral = "B1:B21"
+  var pastoral = "B1:B21";
 
   var sheet = ss.getSheetByName("Pastoral");
   var raw = sheet.getDataRange().getValues();
