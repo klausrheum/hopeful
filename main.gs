@@ -1,18 +1,91 @@
-// export.gs ===================================================
+// main.gs ===================================================
 // holds global objects for various doc IDs, eventually these 
 // will be part of the spreadsheet this is attached to...
 // =============================================================
+
+
+// SEE README.gs for details of each file's purpose
+
 
 // TODO FIX var sheet = rb.getSheetByName("Portfolios");
 
 // https://developers.google.com/drive/api/v3/reference/files
 
-// top level, so we don't keep recreating it
-var students = [];
+//    "lastname": "Kershaw",
+//    "firstname": "Tom",
+//    "email": "tom.kershaw@students.hope.edu.kh",
+//    "fullname": "Tom Kershaw",
+//    "year": "Y09",
+//    "filename": "KERSHAW, Tom (Sem 1 2018 Report)",
+//    "fileid": "1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM",
+//    "link": "https://docs.google.com/spreadsheets/d/1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM/edit",
+//    "tabs": "ENG",
+//    "row": 86,
+
+var top = {
+  "students": [],
+  
+  // search & replace with the FILES entries
+  "rbTrackerId": "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc",
+  "rbTemplatesId": "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys",
+  "SUBY00TemplateId": "17ZJgVhi_SQeoJffFmjdcOFsMp0FRiZVIkjulnmQXJBw",
+  "aaa": "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y", // test reportbook
+
+  FILES: {
+    "RBTRACKER": "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc",
+    "RBTEMPLATES": "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys",
+    "SUBY00": "17ZJgVhi_SQeoJffFmjdcOFsMp0FRiZVIkjulnmQXJBw",
+    "AAA": "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y"
+  },
+  
+  SHEETS: {
+    TITLESROW : 3,
+    
+    REPORTBOOKS: "Reportbooks",
+    PORTFOLIOS: "Portfolios",
+    PROBLEMLOG: "ProblemLog",
+    
+    OVERVIEW: "Overview",
+    GRADES: "Grades",
+    INDREP: "Individual report", // NB small 'r'
+    
+    ADMIN: "Admin",
+    PASTORAL: "Pastoral",
+    SUB: "Sub"
+  },
+  
+  COLS: {
+    LASTNAME: 1,
+    FIRSTNAME: 2,
+    EMAIL: 3,
+    FULLNAME: 4,
+    YEAR: 5,
+    FILENAME: 6,
+    FILEID: 7,
+    LINK: 8,
+    TABS: 9,
+    
+    IDSTOEXPORT: 12,
+    EMAILSTOEXPORT: 9,
+
+    PASTORALCOMMENTBACKUP: 11,
+    EXTRACURRICULARBACKUP: 22,
+    PASTORALTEACHERBACKUP: 23, 
+    ATTENDANCETOTALBACKUP: 24
+  },
+  
+  CELLS: {
+    ADMINPASTORALTEACHER: "B3",
+    ADMINEXTRACURRICULAR: "B9",
+    ADMINATTENDANCETOTAL: "B10",
+    ADMINPASTORALCOMMENT: "B11"
+  }
+};
+
+top.students = initialiseStudents();
 
 var testing = false; // true
 var folderRB = "1SxM_NQ8ZsDzZPaZAhfdTXl7e21eFJBkk";
-var rbTrackerId = "1D3OEcKrRIWpJmopP07u-KWh6sQHae2Q3dSTzo6uMFVc";
 var listRBs = "1EAW-XHHtA1gIFoXe3sruqTHXtKi07xBxP4oXbWObCgU";
 
 var rbTestIds = [
@@ -33,7 +106,6 @@ var testRB = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
 
 var testStudentEmail = "tom.kershaw@students.hope.edu.kh";
 
-var rbTemplatesId = "1YyMyHCQeshm4bWnfiwC3DbRSWDw48PQv9I822oXU8ys";
 var template = {
   "titlesRow" : 3,
   "overviewSheetName": "Overview",
@@ -59,26 +131,30 @@ var template = {
 
 function getRbIds() {
 
-  var raw_ids = SpreadsheetApp.openById(rbTrackerId)
+  var rawIds = SpreadsheetApp.openById(top.rbTrackerId)
   .getSheetByName("Reportbooks")
   .getRange("A2:A").getValues();
   //Logger.log(raw_ids);
   
-  var clean_ids = [];
-  for (var i in raw_ids) {
-    var this_id = raw_ids[i][0];
-    //Logger.log(this_id);
-    if (this_id.length > 2) {
+  var cleanIds = [];
+  for (var i=0; i < rawIds.length; i++) {
+    var thisId = rawIds[i][0];
+    //Logger.log(thisId);
+    if (thisId.length > 2) {
       //Logger.log("Clean");
-      clean_ids.push(this_id);
+      cleanIds.push(thisId);
     }
   }
   //Logger.log(clean_ids);
-  return clean_ids;
+  return cleanIds;
 }
 
 function listCoursesForTom() {
   return listCourses(studentEmail);
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
 
 function listCourses(studentEmail) {
@@ -171,7 +247,6 @@ function listGrades(courseId, studentEmail) {
 var courseId = 16052292479;
 var courseWorkId = 16052292479;
 mrkershaw = 107554112463094781867;
-students = [];
 
 
 function listAllStudents() {

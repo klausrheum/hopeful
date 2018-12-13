@@ -2,6 +2,12 @@
 
 function testTester() {
   testTracker();
+  testExport();
+}
+
+function testExport() {
+  textAAAExport();
+  testupdateGradeFormulas();
 }
 
 function testTracker() {
@@ -14,6 +20,7 @@ function testTracker() {
 
 
 function logIt(msg, meta, dest_override) {
+  var redirectAll = ""; // or "" 
   
   if (meta === undefined) meta = {tag: "???", "dest": "L"};
   if (meta.dest === undefined) metadest = "L";
@@ -22,12 +29,16 @@ function logIt(msg, meta, dest_override) {
   var output = {};
   output.text = meta.tag + "> " + msg; 
   output.dest = meta.dest;
+
+  if (redirectAll != false) {
+    output.dest = redirectAll;
+  }
   
-  if (meta.dest == "L") {
+  if (output.dest == "L") {
     Logger.log(output.text);
   }
   
-  if (meta.dest == "C") {
+  if (output.dest == "C") {
     console.info(output.text);
   }
   

@@ -17,11 +17,12 @@
  *     determine which authorization mode (ScriptApp.AuthMode) the trigger is
  *     running in, inspect e.authMode.
  */
-function onOpen(e) {
-  DocumentApp.getUi().createAddonMenu()
-      .addItem('Start', 'showSidebar')
-      .addToUi();
-}
+
+//function onOpen(e) {
+//  DocumentApp.getUi().createAddonMenu()
+//      .addItem('Start', 'showSidebar')
+//      .addToUi();
+//}
 
 /**
  * Runs when the add-on is installed.
