@@ -207,7 +207,7 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
   var sub = tabName.substring(0, 3);
   //var students = getStudents();
   
-  console.warn("[%s] >>> Exporting for %s", subYear, owner);
+  console.warn("[%s] >>> Checking for %s", subYear, owner);
   
   var gradeSheet = rbss.getSheetByName("Grades");
   
@@ -326,6 +326,13 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             '[%s] FEW? %s grade(s) - %s',
             subYear, rowScores.length.toString(), rowFullname);
         }
+
+        // ... 10 or more grades ?
+        if (rowScores.length >= 10) {
+          console.info(
+            '[%s] MANY? %s grade(s) - %s',
+            subYear, rowScores.length.toString(), rowFullname);
+        }
         
         // ... average score less than 30% ?
         if (rowAvgPercent < 0.30) {
@@ -370,11 +377,11 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             SpreadsheetApp.flush();
             
             // copy grades data
-            var titlesAndPercentages = rbRepSheet.getRange("B1:U8").getValues();
-            portfolioSheet.getRange("B1:U8").setValues(titlesAndPercentages);
+            var titlesAndPercentages = rbRepSheet.getRange("B1:Q8").getValues();
+            portfolioSheet.getRange("B1:Q8").setValues(titlesAndPercentages);
             
-            var letterGrades = rbRepSheet.getRange("B10:U11").getValues();
-            portfolioSheet.getRange("B10:U11").setValues(letterGrades);
+            var letterGrades = rbRepSheet.getRange("B10:Q11").getValues();
+            portfolioSheet.getRange("B10:Q11").setValues(letterGrades);
             
             // wipe out GPA (for now)
             portfolioSheet.getRange("C6:C11").setValue("");
@@ -384,6 +391,12 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             
             // clear out unused Titles
             updateValues(portfolioSheet, "F6:6", ["Title"], [""]);
+            
+            // delete grading info for non-graded subjects
+            if (["ELL", "VIA"].indexOf(tabName) > -1) {
+              portfolioSheet.getRange("B6:Q11").setValue("");  
+              portfolioSheet.getRange("B6").setValue("This subject is not formally assessed");  
+            }
             
             // TODO add tabs list
             var tabsList = [];
@@ -491,12 +504,12 @@ function addPastoralToEveryStudent() {
   for (var s = 0; s < top.students.length; s++) {
     // if (s>2) break;
     var student = top.students[s];
-    var sheet = copyTemplateToStudent(student, "Pastoral", true);
-    Logger.log(sheet.getName());
+    var sheet = copyTemplateToStudent(student, top.SHEETS.PASTORAL, false);
+    console.log("Adding %s to %s", sheet.getName(), student.fullname);
     var ss = SpreadsheetApp.openById(student.fileid);
     SpreadsheetApp.setActiveSpreadsheet(ss);
     SpreadsheetApp.setActiveSheet(sheet);
-    SpreadsheetApp.getActiveSpreadsheet().moveActiveSheet(1);
+    SpreadsheetApp.getActiveSpreadsheet().moveActiveSheet(2);
   }
 }
 
@@ -520,9 +533,10 @@ function copySheet(srcId, destId, srcName, destName, replace) {
   
   if (destSheetExists) {
     if (replace) {
-      //destFile.deleteSheet(destSheet);
-      var random = randInt(10000,99999);
-      destSheet.setName(destSheet.getName() + random).hideSheet();
+      console.warn("Deleting sheet %s (replace=%s)", destName, replace);
+      destFile.deleteSheet(destSheet);
+      //var random = randInt(10000,99999);
+      //destSheet.setName(destSheet.getName() + random).hideSheet();
     } else {
       return destSheet;
     }
@@ -582,4 +596,66 @@ function orderTabs(ss) {
   // loop through the tabs, sorting them into order
   var meta = {'tag': arguments.callee.name, "dest": "L"};
   
+}
+
+function hideSheets() {
+  var postfix = "_backup";
+  // for sheet in list_of_sheets:
+  for (var s = 0; s < top.students.length; s++) {
+    var student = top.students[s];
+    var ss = SpreadsheetApp.openById(student.fileid);
+    var ssName = ss.getName();
+    var sheets = ss.getSheets();
+    
+    for (var sheet = 0; sheet < sheets.length; sheet++) {
+      // delete sheet
+      var thisSheet = sheets[sheet];
+      var sheetName = thisSheet.getName();
+      
+      if (sheetName == top.SHEETS.ADMIN) {
+        console.log("[%s] I'm NOT going to delete sheet %s", ssName, sheetName);
+        
+      } else {
+        console.log("[%s] I AM going to delete sheet %s", ssName, sheetName); 
+        thisSheet.setName(sheetName + postfix);
+        thisSheet.hideSheet();
+      }
+    }    
+  }
+}
+
+function backupPastoralAdmin() {
+  
+  var fields = [
+    [top.CELLS.ADMINPASTORALTEACHER, top.COLS.PASTORALTEACHERBACKUP],
+    [top.CELLS.ADMINEXTRACURRICULAR, top.COLS.EXTRACURRICULARBACKUP],
+    [top.CELLS.ADMINATTENDANCETOTAL, top.COLS.ATTENDANCETOTALBACKUP],
+    [top.CELLS.ADMINPASTORALCOMMENT, top.COLS.PASTORALCOMMENTBACKUP]
+  ];
+  
+  for (var s = 0; s < top.students.length; s++) {
+    //if (s >= 1) break;
+    
+    var student = top.students[s];
+    console.log('Backing up Pastoral Admin data for %s', student.fullname);
+    var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
+    var portfoliosSheet = rbTracker.getSheetByName(top.SHEETS.PORTFOLIOS);
+    
+    Logger.log("%s", student.fullname);
+    
+    for (var f = 0; f < fields.length; f++) {
+      var pf = SpreadsheetApp.openById(student.fileid);
+      var pfName = pf.getName();
+      var value = pf
+      .getSheetByName(top.SHEETS.ADMIN)
+      .getRange(fields[f][0])
+      .getValue();
+      
+      Logger.log(".getRange(%s, %s).setValue(%s)", student.row, fields[f][1], value);
+
+      portfoliosSheet
+      .getRange(student.row, fields[f][1])
+      .setValue(value);
+    } // this student
+  }  
 }

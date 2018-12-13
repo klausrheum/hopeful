@@ -141,27 +141,27 @@ function testGetStudentByEmail() {
   //Logger.log(student);
   
   var testStudent = {
-      "lastname": "Kershaw",
-      "firstname": "Tom",
-      "email": "tom.kershaw@students.hope.edu.kh",
-      "fullname": "Tom Kershaw",
-      "year": "Y09",
-      "filename": "KERSHAW, Tom (Sem 1 2018 Report)",
-      "fileid": "1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM",
-      "link": "https://docs.google.com/spreadsheets/d/1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM/edit",
-      "tabs": "ENG",
-      "row": 86,
-    };
+    "lastname": "Kershaw",
+    "firstname": "Tom",
+    "email": "tom.kershaw@students.hope.edu.kh",
+    "fullname": "Tom Kershaw",
+    "year": "Y09",
+    "filename": "KERSHAW, Tom (Sem 1 2018 Report)",
+    "fileid": "1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM",
+    "link": "https://docs.google.com/spreadsheets/d/1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM/edit",
+    "tabs": "ENG",
+    "row": 86,
+  };
   
-var testFields = [
-      "lastname",
-      "firstname",
-      "email",
-      "fullname",
-      "year",
-      "filename",
-      "fileid",
-      "link"];
+  var testFields = [
+    "lastname",
+    "firstname",
+    "email",
+    "fullname",
+    "year",
+    "filename",
+    "fileid",
+    "link"];
   
   for (var f=0; f<testFields.length; f++) { 
     var field = testFields[f];
@@ -450,3 +450,5 @@ function updatePortfolioFormulas() {
   updateFormulas(rb, formulas);
   
 }
+
+

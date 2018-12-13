@@ -11,6 +11,17 @@
 
 // https://developers.google.com/drive/api/v3/reference/files
 
+//    "lastname": "Kershaw",
+//    "firstname": "Tom",
+//    "email": "tom.kershaw@students.hope.edu.kh",
+//    "fullname": "Tom Kershaw",
+//    "year": "Y09",
+//    "filename": "KERSHAW, Tom (Sem 1 2018 Report)",
+//    "fileid": "1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM",
+//    "link": "https://docs.google.com/spreadsheets/d/1I2WDPzVVat5xwczFGW2iUtyEivsThKa9Y8YgZAno3GM/edit",
+//    "tabs": "ENG",
+//    "row": 86,
+
 var top = {
   "students": [],
   
@@ -55,7 +66,19 @@ var top = {
     TABS: 9,
     
     IDSTOEXPORT: 12,
-    EMAILSTOEXPORT: 9
+    EMAILSTOEXPORT: 9,
+
+    PASTORALCOMMENTBACKUP: 11,
+    EXTRACURRICULARBACKUP: 22,
+    PASTORALTEACHERBACKUP: 23, 
+    ATTENDANCETOTALBACKUP: 24
+  },
+  
+  CELLS: {
+    ADMINPASTORALTEACHER: "B3",
+    ADMINEXTRACURRICULAR: "B9",
+    ADMINATTENDANCETOTAL: "B10",
+    ADMINPASTORALCOMMENT: "B11"
   }
 };
 

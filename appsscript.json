@@ -8,12 +8,5 @@
     }]
   },
   "exceptionLogging": "STACKDRIVER",
-  
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/classroom.student-submissions.students.readonly",
-    "https://www.googleapis.com/auth/classroom.courses.readonly",
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/documents"
-  ]
+  "oauthScopes": ["https://www.googleapis.com/auth/classroom.student-submissions.students.readonly", "https://www.googleapis.com/auth/classroom.courses.readonly", "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/documents"]
 }
