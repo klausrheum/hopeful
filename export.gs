@@ -624,38 +624,68 @@ function hideSheets() {
   }
 }
 
-function backupPastoralAdmin() {
+function test_backupPastoralAdmin() {
+  var testEmail = "bobby.tables@students.hope.edu.kh";
+  var student = getStudentByEmail(testEmail);
   
-  var fields = [
-    [top.CELLS.ADMINPASTORALTEACHER, top.COLS.PASTORALTEACHERBACKUP],
-    [top.CELLS.ADMINEXTRACURRICULAR, top.COLS.EXTRACURRICULARBACKUP],
-    [top.CELLS.ADMINATTENDANCETOTAL, top.COLS.ATTENDANCETOTALBACKUP],
-    [top.CELLS.ADMINPASTORALCOMMENT, top.COLS.PASTORALCOMMENTBACKUP]
-  ];
+  backupPastoralAdmin(student); 
+  
+}
+
+function backupAllPastoralAdmin() {
   
   for (var s = 0; s < top.students.length; s++) {
     //if (s >= 1) break;
     
     var student = top.students[s];
-    console.log('Backing up Pastoral Admin data for %s', student.fullname);
-    var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
-    var portfoliosSheet = rbTracker.getSheetByName(top.SHEETS.PORTFOLIOS);
-    
-    Logger.log("%s", student.fullname);
-    
-    for (var f = 0; f < fields.length; f++) {
-      var pf = SpreadsheetApp.openById(student.fileid);
-      var pfName = pf.getName();
-      var value = pf
-      .getSheetByName(top.SHEETS.ADMIN)
-      .getRange(fields[f][0])
-      .getValue();
-      
-      Logger.log(".getRange(%s, %s).setValue(%s)", student.row, fields[f][1], value);
-
-      portfoliosSheet
-      .getRange(student.row, fields[f][1])
-      .setValue(value);
-    } // this student
+    backupPastoralAdmin(student);
   }  
+}
+
+function backupPastoralAdmin(student) {
+  var fields = [
+//    [top.CELLS.ADMINPASTORALTEACHER, top.COLS.PASTORALTEACHERBACKUP],
+//    [top.CELLS.ADMINEXTRACURRICULAR, top.COLS.EXTRACURRICULARBACKUP],
+//    [top.CELLS.ADMINATTENDANCETOTAL, top.COLS.ATTENDANCETOTALBACKUP],
+//    [top.CELLS.ADMINPASTORALCOMMENT, top.COLS.PASTORALCOMMENTBACKUP]
+  ];
+  
+  console.warn('Backing up Pastoral Admin data for %s', student.fullname);
+  var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
+  var portfoliosSheet = rbTracker.getSheetByName(top.SHEETS.PORTFOLIOS);
+  var pf = SpreadsheetApp.openById(student.fileid);
+  var pfName = pf.getName();
+  
+  Logger.log("%s", student.fullname);
+  
+  for (var f = 0; f < fields.length; f++) {
+    var value = pf
+    .getSheetByName(top.SHEETS.ADMIN)
+    .getRange(fields[f][0])
+    .getValues();
+    
+    console.log(".getRange(%s, %s).setValue(%s)", student.row, fields[f][1], value);
+    
+    portfoliosSheet
+    .getRange(student.row, fields[f][1])
+    .setValues(value);
+    
+  } // this field
+  
+  // copy, compress & save ATTRIBUTES
+  var values = pf
+  .getSheetByName(top.SHEETS.ADMIN)
+  .getRange(top.CELLS.ADMINATTRIBUTES)
+  .getValues();
+  
+  var compressedValue = [];
+  values.forEach(function (v, i) {
+    compressedValue.push(v[0]);
+  });
+  compressedValue = compressedValue.join(", ");
+  Logger.log(compressedValue);
+  
+  portfoliosSheet
+  .getRange(student.row, top.COLS.ATTRIBUTESBACKUP)
+  .setValue(compressedValue);
 }

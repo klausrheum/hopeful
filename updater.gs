@@ -3,70 +3,7 @@
 // 2. update formulas in teacher RBs and student portfolios
 // =============================================================
 
-//var COLS = {
-//  "COMMENT":{"col":25}, // "text": "Comment", "width": 
-//  "TABS": {"col": 26},
-//  "DATE": {"col":27},
-//  "EXPORTYN": {"col": 28}
-//};
-//Logger.log(COLS.COMMENT);
 
-var OLD = 0;
-var NEW = 1;
-
-function updatePortfolios() {
-  // copy Pastoral Comment, sometimes, extra-curric & absent to RB Tracker
-  
-  version = OLD;
-  
-  var startTime = new Date();
-  console.warn(
-    "updatePortfolios: STARTED " + startTime );
-
-  for (var i=0; i < top.students.length; i++) {
-    var student = top.students[i];
-    // SAFETY CATCH =============================
-    
-    if (i>2) break; // stop after two reportbooks
-    
-    // END SAFETY CATCH =========================
-    var id = student.fileid;
-    var ss = SpreadsheetApp.openById(id);
-    console.info("Backing up " + ss.getName());
-    var comment = backupPortfolio(ss);
-  }
-  
-  var endTime = new Date();
-  var elapsedTime = (endTime - startTime)/1000;
-  console.warn(
-    "updatePortfolios: COMPLETED %s in %s secs", endTime, elapsedTime);
-
-}
-
-function test_backupPortfolio() {
-  var ss = SpreadsheetApp.openById(lily);
-  version = NEW;
-  var data = backupPortfolio(ss);
-  if (comment.slice(0, 4) != "Lily") {
-    throw "FAIL (backupPortfolio): text not found in " + comment;
-  }
-}
-
-function backupPortfolio(ss) {
-  
-  // UNFINISHED - DO NOT USE //
-  
-  var pastoral = "B1:B21";
-
-  var sheet = ss.getSheetByName("Pastoral");
-  var raw = sheet.getDataRange().getValues();
-  var data = {};
-  data.name = raw[3, 1];
-  data.comment = raw[19, 1];
-  data.extra = raw[6, 1];
-  data.attributes = sheet.getRange("");
-  return data;
-}
 
 function updateReportbooks() {
   var rbIds = getRbIds();
@@ -112,6 +49,7 @@ function updateDeleteUnusedDatesAndTitles(ss) {
   var sheet = ss.getSheetByName(template.gradesSheetName);    
   updateValues(sheet, "H2:3", ["Title", "Date"], ["", ""]);
 }
+
 
 function updateCommentsColumn(ss) {
   var sheet = ss.getSheetByName(template.gradesSheetName);    
@@ -255,6 +193,78 @@ function updateValues(sheet, rangeA1, oldValues, newValues) {
 }
 
 
+
+function test_updatePortfolios() {
+  // convert the attributes table to full sentences
+  var testEmail = "bobby.tables@students.hope.edu.kh";
+  testEmail = "johannes.christensen@students.hope.edu.kh";
+  testEmail = "thomas.norman@students.hope.edu.kh";
+  var student = getStudentByEmail(testEmail);
+  var pf = SpreadsheetApp.openById(student.fileid);
+  updatePortfolio(pf);
+}
+
+function updateAllPortfolios() {
+  var students = getStudents();
+  for (var s = 0; s < students.length; s++) {
+    // if (s > 5) break;
+    
+    var student = students[s];
+    console.log("%s %s", student.fullname, student.fileid); 
+    var pf = SpreadsheetApp.openById(student.fileid);
+    updatePortfolio(pf);
+  }
+}
+
+function updatePortfolio(pf) {
+  Logger.log ("Name: " + pf.getName());
+  var pastoralSheet = pf.getSheetByName(top.SHEETS.PASTORAL);
+  pastoralSheet.getRange("B15:C23")
+  .merge();
+  
+  pastoralSheet.getRange("B15")
+  .setFormula(
+    '=textjoin("\n", TRUE, arrayformula(' + 
+    'if (Admin!B13:B21 <> "", ' +
+    'upper(left(Admin!B13:B21)) & ' +
+    'mid(Admin!B13:B21, 2, 999) & " " & ' +
+    'lower(Admin!A13:A21) & ".", "")))');
+  console.log("Successfully updated");
+}
+
+function updatePortfolioFormulas() {
+  
+  var formulas = [
+    {
+      // update fullname
+      "sheet": "Portfolios", 
+      "cell": "D2", 
+      "range": "D3:D", 
+      "formula": '=B2 & " " & A2',
+      // TODO "r1c1": false
+    },
+    {
+      // update filename
+      "sheet": "Portfolios", 
+      "cell": "F2", 
+      "range": "F3:F", 
+      "formula": '=UPPER(A2) & ", " & B2 & " (Sem 1 2018 Report)"',
+      // TODO "r1c1": false;
+    },
+    {
+      // update link
+      "sheet": "Portfolios", 
+      "cell": "J2", 
+      "range": "J3:J", 
+      "formula": '=if(istext(G2), HYPERLINK("https://docs.google.com/spreadsheets/d/" & G2 & "/edit", F2), "")',
+      // TODO "r1c1": false;
+    }
+  ];
+  
+  var rb = SpreadsheetApp.openById(top.rbTrackerId);
+  updateFormulas(rb, formulas);
+  
+}
 
 function updateRBFormulas(ss) {
   

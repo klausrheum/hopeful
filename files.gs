@@ -100,16 +100,67 @@ function copyReportbooksDataToTracker() {
 }
 
 
-function createPdf(ss, sheetNum, studentNames) {
-  if (studentNames === undefined) {
-    studentNames = [];
+function test_killSheets() {
+  var lisa = "1-L0dJ5d0ZE3QaVtR-6dTlAJVLVvc4cgWb_Twu5Zby-A"; 
+  var ss = SpreadsheetApp.openById(lisa);
+  killSheets(ss, [/.*_backup/]);
+}
+
+function killSheets(ss, killPatterns) {
+  if (killPatterns === undefined) {
+    killPatterns = [];
   }
+  
   var sheets = ss.getSheets();
   
   // hide all the sheets we DON'T want in the export
   sheets.forEach(function (s, i) {
-    if(i !== sheetNum) s.hideSheet()
-      });
+    var sheetName = s.getName();
+    
+    killPatterns.forEach(function (pattern, j) {
+      
+      if(sheetName.match(pattern) ) {
+        //s.deleteSheet();
+        Logger.log ("'%s' found in sheetName '%s', killing", pattern, sheetName);
+      } else {
+        Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName); 
+      }
+    });
+  });
+}
+
+function test_createPdf() {
+  var lisa = "1-L0dJ5d0ZE3QaVtR-6dTlAJVLVvc4cgWb_Twu5Zby-A"; 
+  var ss = SpreadsheetApp.openById(lisa);
+  createPdf(ss, [/^Admin$/, /.*_backup/], [/^Admin$/]);
+}
+
+function createPdf(ss, hideBeforePatterns, showAfterPatterns, killPatterns) {
+  if (hideBeforePatterns === undefined) {
+    hideBeforePatterns = [];
+  }
+  if (showAfterPatterns === undefined) {
+    showAfterPatterns = [];
+  }
+  
+  var sheets = ss.getSheets();
+  
+  // hide all the sheets we DON'T want in the export
+  sheets.forEach(function (s, i) {
+    var sheetName = s.getName();
+    
+    hideBeforePatterns.forEach(function (pattern, j) {
+      
+      if(sheetName.match(pattern) ) {
+        s.hideSheet();
+        Logger.log ("'%s' found in sheetName '%s', hiding", pattern, sheetName);
+      } else {
+        Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName); 
+      }
+    });
+  });
+  
+  Logger.log("Export the PDF!");
   
   // create url to request pdf of current doc
   var url = DriveApp.Files.get(ss.getId())
@@ -126,40 +177,44 @@ function createPdf(ss, sheetNum, studentNames) {
   
   var fileName = ss.getName();
   
-  for (var s in studentNames) {
-    // newFilename: SUB whatever Y00 Tom Kershaw
-    var studentName = studentNames[s];
-    var newFileName = fileName.replace("Reportbook", studentName);
-    Logger.log(newFileName);
-    
-    var pdfCreated = false;
-    do {
-    
-      try {
-        
-        var response = UrlFetchApp.fetch(url, {
-          headers: {
-            'Authorization': 'Bearer ' + token
-          }
-        });
-        Logger.log(response.getResponseCode());
-        
-        DriveApp.createFile(response.getBlob()).setName(newFileName);
-        pdfCreated = true;
-      } 
-      
-      catch (error) {
-        Logger.log(error);
-      }
-      
-    } while (! pdfCreated);
-    
+  Logger.log(fileName);
   
-    // unhide the sheets
-    sheets.forEach(function (s) {
-      s.showSheet();
-    })
-  }
+  var pdfCreated = false;
+  do {
+    
+    try {
+      
+      var response = UrlFetchApp.fetch(url, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      Logger.log(response.getResponseCode());
+      
+      DriveApp.createFile(response.getBlob()).setName(fileName);
+      pdfCreated = true;
+    } 
+    
+    catch (error) {
+      Logger.log(error);
+    }
+    
+  } while (! pdfCreated);
+  
+  
+  // show all the sheets we want visible again after PDFing
+  sheets.forEach(function (s, i) {
+    var sheetName = s.getName();
+    
+    showAfterPatterns.forEach(function (pattern, j) {
+      if(sheetName.match(pattern)) {
+        s.showSheet();
+        Logger.log ("'%s' found in sheetName '%s', showing", pattern, sheetName);
+      } else {
+        Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName);
+      }
+    });
+  });
 }
 
 // [START reportbooks_export_grades_page_to_pdf]
