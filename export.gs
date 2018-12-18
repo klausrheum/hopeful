@@ -41,9 +41,9 @@ function exportAllRBs() {
     
     // SAFETY CATCH
     
-    if (r > 4) break;
+    //if (r > 4) break;
     
-   // SAFETY CATCH
+    // SAFETY CATCH
     
     var rbId = rbIds[r];
     Logger.log(rbId);
