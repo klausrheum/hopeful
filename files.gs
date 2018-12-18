@@ -106,36 +106,61 @@ function test_killSheets() {
   killSheets(ss, [/.*_backup/]);
 }
 
+function killUnwantedPortfolioSheets() {
+  var students = getStudents();
+  for (var i=0; i<students.length; i++) {
+    var ss = SpreadsheetApp.openById(students[i].fileid);
+    console.warn("[%s] Checking for unwanted sheets to kill", students[i].fullname);
+    killSheets(ss, [/.*_backup/, /IGCSE MAT A/, /PED IGCSE/]);
+    //if (i > 2) break;
+  }
+}
+
 function killSheets(ss, killPatterns) {
   if (killPatterns === undefined) {
-    killPatterns = [];
+    return;
   }
   
   var sheets = ss.getSheets();
-  
-  // hide all the sheets we DON'T want in the export
+  // kill all the sheets we DON'T want any more
   sheets.forEach(function (s, i) {
     var sheetName = s.getName();
     
     killPatterns.forEach(function (pattern, j) {
       
       if(sheetName.match(pattern) ) {
-        //s.deleteSheet();
-        Logger.log ("'%s' found in sheetName '%s', killing", pattern, sheetName);
+        ss.deleteSheet(s);  // UNCOMMENT THIS LINE TO USE
+        console.log ("'%s' found in sheetName '%s', killing", pattern, sheetName);
+        
       } else {
-        Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName); 
+        // Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName); 
       }
     });
   });
 }
 
-function test_createPdf() {
-  var lisa = "1-L0dJ5d0ZE3QaVtR-6dTlAJVLVvc4cgWb_Twu5Zby-A"; 
-  var ss = SpreadsheetApp.openById(lisa);
-  createPdf(ss, [/^Admin$/, /.*_backup/], [/^Admin$/]);
+
+function generateAllPortfolioPDFs() {
+  var students = getStudents();
+  for (var s = 0; s < students.length; s++) {
+    // if (s > 5) break;
+    
+    var student = students[s];
+    console.log("%s %s", student.fullname, student.fileid); 
+    var pf = SpreadsheetApp.openById(student.fileid);
+    createPdf(pf, [/^Admin$/, /.*_backup/], [/^Admin$/]);
+  }
+  
 }
 
-function createPdf(ss, hideBeforePatterns, showAfterPatterns, killPatterns) {
+function test_createPdf() {
+  var lisa = "1-L0dJ5d0ZE3QaVtR-6dTlAJVLVvc4cgWb_Twu5Zby-A"; 
+  var pf = SpreadsheetApp.openById(lisa);
+  Logger.log(pf.getName());
+  createPdf(pf, [/^Admin$/, /.*_backup/], [/^Admin$/]);
+}
+
+function createPdf(ss, hideBeforePatterns, showAfterPatterns) {
   if (hideBeforePatterns === undefined) {
     hideBeforePatterns = [];
   }
@@ -153,54 +178,20 @@ function createPdf(ss, hideBeforePatterns, showAfterPatterns, killPatterns) {
       
       if(sheetName.match(pattern) ) {
         s.hideSheet();
-        Logger.log ("'%s' found in sheetName '%s', hiding", pattern, sheetName);
+        //Logger.log ("'%s' found in sheetName '%s', hiding", 
+        //            pattern, sheetName);
       } else {
-        Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName); 
+        //Logger.log ("'%s' not found in sheetName '%s', skipping", 
+        //            pattern, sheetName); 
       }
     });
   });
   
   Logger.log("Export the PDF!");
   
-  // create url to request pdf of current doc
-  var url = DriveApp.Files.get(ss.getId())
-  .exportLinks['application/pdf'];
-  
-  url = url + '&size=a4' + //paper size
-    '&portrait=false' + //orientation, false for landscape
-      '&fitw=true' + //fit to width, false for actual size
-        '&sheetnames=false&printtitle=false&pagenumbers=false' + //hide optional
-          '&gridlines=false' + //false = hide gridlines
-            '&fzr=false'; //do not repeat row headers (frozen rows) on each page
-  
-  var token = ScriptApp.getOAuthToken();
-  
-  var fileName = ss.getName();
-  
-  Logger.log(fileName);
-  
-  var pdfCreated = false;
-  do {
-    
-    try {
-      
-      var response = UrlFetchApp.fetch(url, {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
-      Logger.log(response.getResponseCode());
-      
-      DriveApp.createFile(response.getBlob()).setName(fileName);
-      pdfCreated = true;
-    } 
-    
-    catch (error) {
-      Logger.log(error);
-    }
-    
-  } while (! pdfCreated);
-  
+  // savePDFs( ss, optSheetName , optOutputName, optEmail );
+
+  savePDF( ss, "john.kershaw@hope.edu.kh" );
   
   // show all the sheets we want visible again after PDFing
   sheets.forEach(function (s, i) {
@@ -209,13 +200,79 @@ function createPdf(ss, hideBeforePatterns, showAfterPatterns, killPatterns) {
     showAfterPatterns.forEach(function (pattern, j) {
       if(sheetName.match(pattern)) {
         s.showSheet();
-        Logger.log ("'%s' found in sheetName '%s', showing", pattern, sheetName);
+        //Logger.log ("'%s' found in sheetName '%s', showing", pattern, sheetName);
       } else {
-        Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName);
+        //Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName);
       }
     });
   });
 }
+
+
+function savePDF( ss, optEmail) {
+  var outputName = ss.getName(); 
+  console.log("Exporting PDF %s", outputName);
+  
+  // Get folder containing spreadsheet, for later export
+  var parents = DriveApp.getFileById(ss.getId()).getParents();
+  if (parents.hasNext()) {
+    var folder = parents.next();
+  }
+  else {
+    folder = DriveApp.getRootFolder();
+  }
+
+  var url_base = ss.getUrl().replace(/edit$/,'');
+
+  //additional parameters for exporting the sheet as a pdf
+  var url_ext = 'export?exportFormat=pdf&format=pdf'   //export as pdf
+
+      // Print either the entire Spreadsheet or the specified sheet if optSheetId is provided
+      + '&id=' + ss.getId()      // Print either the entire Spreadsheet or the specified sheet if optSheetId is provided
+      // following parameters are optional...
+      + '&size=a4'          // paper size WAS letter
+      + '&portrait=false'   // orientation, false for landscape WAS true
+      + '&scale=4'          //1= Normal 100% / 2= Fit to width / 3= Fit to height / 4= Fit to Page
+      //+ '&fitw=true'       // fit to width, false for actual size WAS true
+      + '&sheetnames=false&printtitle=false&pagenumbers=false'  //hide optional headers and footers
+      + '&gridlines=false'  // hide gridlines
+      + '&fzr=false';       // do not repeat row headers (frozen rows) on each page
+
+  /*
+  &format=pdf                   //export format
+  &size=a4                      //A3/A4/A5/B4/B5/letter/tabloid/legal/statement/executive/folio
+  &portrait=false               //true= Potrait / false= Landscape
+  &scale=1                      //1= Normal 100% / 2= Fit to width / 3= Fit to height / 4= Fit to Page
+  &top_margin=0.00              //All four margins must be set!
+  &bottom_margin=0.00           //All four margins must be set!
+  &left_margin=0.00             //All four margins must be set!
+  &right_margin=0.00            //All four margins must be set!
+  &gridlines=false              //true/false
+  &printnotes=false             //true/false
+  &pageorder=2                  //1= Down, then over / 2= Over, then down
+  &horizontal_alignment=CENTER  //LEFT/CENTER/RIGHT
+  &vertical_alignment=TOP       //TOP/MIDDLE/BOTTOM
+  &printtitle=false             //true/false
+  &sheetnames=false             //true/false
+  &fzr=false                    //true/false
+  &fzc=false                    //true/false
+  &attachment=false             //true/false
+  */
+  var options = {
+    headers: {
+      'Authorization': 'Bearer ' +  ScriptApp.getOAuthToken(),
+    }
+  }
+  var response = UrlFetchApp.fetch(url_base + url_ext, options);
+  var blob = response.getBlob().setName((outputName)+ '.pdf');
+  folder.createFile(blob);
+  
+  if (optEmail) {
+    GmailApp.sendEmail(optEmail, "Here is a file named " + outputName, "Please let me know if you have any questions or comments.", {attachments:blob});
+  }
+} 
+
+
 
 // [START reportbooks_export_grades_page_to_pdf]
 /**

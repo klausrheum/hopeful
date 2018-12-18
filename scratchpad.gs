@@ -13,6 +13,18 @@ function falsey() {
   student = {}
   Logger.log(! student.email);
 }
+
+
+
+function checkBackup(tabName) {
+  return tabName.indexOf("_backup") == -1;
+}
+
+function filterList() {
+  var tabs = ["fish_backup", "loaf", "cow_backup", "pig"];
+  Logger.log(tabs.filter(checkBackup));
+}
+
 // Old scale: SCI Y07 Reportbook - done
 // Old scale: MAT Y06 Reportbook - done
 // Old scale: ENG A 2018 Y07 Reportbook - done

@@ -14,17 +14,16 @@ function exportAllRBs() {
   
 
   var idsToExport = getRbIdsToExport();
-  Logger.log (idsToExport);
+  console.log (idsToExport);
   
   var studentsToUpdate = getStudentsToUpdate();  
-  Logger.log (studentsToUpdate);
+  //Logger.log (studentsToUpdate);
   if (studentsToUpdate != []) {
     exportOverride = "ALL";
   }
 
-
-
   var rbIds = getRbIds();
+  console.log(rbIds.length);
   
   var aaa99 = "1CGQAR4QafGnC_LarUQqECY2Fy9Dv8jBkIsNlwUyuS3Y";
   var phy09 = "1KeLj6BLp_-_sJZ5FUtuR477C9N9Do1audaQ_Py73iI0";
@@ -36,20 +35,24 @@ function exportAllRBs() {
   // var rbIds = [cpe11];
   var startTime = new Date();
   
-  console.warn(
-    "exportAllRBs: STARTED " + startTime );
+  console.warn("exportAllRBs: STARTED " + startTime );
   
   for (var r = 0; r<rbIds.length; r++) {
-    //if (r > 2) break;
+    
+    // SAFETY CATCH
+    
+    if (r > 4) break;
+    
+   // SAFETY CATCH
     
     var rbId = rbIds[r];
-
+    Logger.log(rbId);
     if (idsToExport.indexOf(rbId) == -1) {
-      //console.info("Skipping %s", rbId);
+      // console.info("Skipping %s", rbId);
       continue;
       
     } else {
-      //console.info("%s is ticked for export", rbId);
+      console.info("%s is ticked for export", rbId);
       var rbss = SpreadsheetApp.openById(rbId);
       var rbName = rbss.getName();
 
@@ -61,8 +64,7 @@ function exportAllRBs() {
   var endTime = new Date();
   var elapsedTime = (endTime - startTime)/1000;
   
-  console.warn(
-    "exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
+  console.warn("exportAllRBs: COMPLETED %s in %s secs", endTime, elapsedTime);
 }
 
 function getRbIdsToExport() {
@@ -72,8 +74,10 @@ function getRbIdsToExport() {
   var lastRow = rbSheet.getLastRow();
   
   var rawIds = rbSheet.getRange(2, top.COLS.IDSTOEXPORT, lastRow, 1).getValues();
+  
   var idsToExport = [];
   var thisId;
+  
   for (var i = 0; i < rawIds.length; i++) {
     thisId = rawIds[i][0];
     if (thisId.length > 0) {
@@ -88,9 +92,9 @@ function getStudentsToUpdate() {
   var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
   var pfSheet = rbTracker.getSheetByName(top.SHEETS.PORTFOLIOS);
   var lastRow = pfSheet.getLastRow();
-  Logger.log (lastRow);
   
   var rawIds = pfSheet.getRange(2, top.COLS.EMAILSTOEXPORT, lastRow, 1).getValues();
+  Logger.log(rawIds);
   var studentsToUpdate = [];
   var thisId;
   for (var i = 0; i < rawIds.length; i++) {
@@ -99,6 +103,7 @@ function getStudentsToUpdate() {
       studentsToUpdate.push(thisId); 
     }
   }
+  Logger.log("studentsToUpdate");
   Logger.log(studentsToUpdate);
   return studentsToUpdate;
 }
@@ -199,6 +204,9 @@ function text_AAAExport() {
 function exportStudentsFromRB(rbss, studentsToUpdate) {
   var meta = {'tag': arguments.callee.name, "dest": "L"};
 
+  var rbTracker = SpreadsheetApp.openById(top.FILES.RBTRACKER);
+  var pfSheet = rbTracker.getSheetByName(top.SHEETS.PORTFOLIOS);
+
   var srcName = rbss.getName();
   var owner = rbss.getOwner();
   var len = srcName.length;
@@ -259,7 +267,7 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
     
     var exported = false;
     
-    //   open student.fileid from RB Tracker
+    //  open student.fileid from RB Tracker
     var row = rows[r];
     
     var rowLastname   = row[0];
@@ -393,7 +401,7 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             updateValues(portfolioSheet, "F6:6", ["Title"], [""]);
             
             // delete grading info for non-graded subjects
-            if (["ELL", "VIA"].indexOf(tabName) > -1) {
+            if (["ELL", "VIA"].indexOf(tabName) == -1) {
               portfolioSheet.getRange("B6:Q11").setValue("");  
               portfolioSheet.getRange("B6").setValue("This subject is not formally assessed");  
             }
@@ -401,13 +409,19 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             // TODO add tabs list
             var tabsList = [];
             tabsList = portfolioFile.getSheets().map(function(sheet) {
-              return [sheet.getName()];
+              return sheet.getName();
             });
             
             // update timestamp, uncheck YN, etc
             // add datestamp
             var newTimestamp = "" + new Date();
-            var newExportTabs = tabsList.join(", ");
+            
+            var newExportTabs = tabsList.filter(function(tab) {
+              return tab.indexOf("_backup") == -1;
+            });
+            var newExportTabsString = newExportTabs.join(", ");
+            Logger.log("newExportTabsString: %s", newExportTabsString);
+            
             var newExportYN = exported ? "Y" : "N";
             var url = portfolioFile.getUrl();
             url += '#gid=';
@@ -428,6 +442,16 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             gradeSheet.getRange(r+7, 26, 1, 3).setValues(replacementRows[r]);
             
             // TODO (IDEA - MAYBE?) copy grade data (do the math?) and the comment
+            
+            
+            // update list of exported tabs to Portfolios tab
+            pfSheet
+            .getRange(student.row, top.COLS.PORTFOLIOTABSLIST)
+            .setValue(newExportTabsString);
+            
+            pfSheet
+            .getRange(student.row, top.COLS.PORTFOLIOLASTEXPORT)
+            .setValue(newTimestamp);
             
           }
           

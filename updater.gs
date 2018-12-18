@@ -18,20 +18,24 @@ function updateReportbooks() {
     
     // SAFETY CATCH =============================
     
-    if (i>2) break; // stop after two reportbooks
+    //if (i>10) break; // stop after two reportbooks
     
     // END SAFETY CATCH =========================
     
     id = rbIds[i];
     var ss = SpreadsheetApp.openById(id);
-    console.info("Updating " + ss.getName());
+    //console.info("Updating " + ss.getName());
+    
+    var overviewSubjectTeacher = ss.getSheetByName(top.SHEETS.OVERVIEW)
+    .getRange("B1:B2").getValues();
+    console.log("[%s] %s", ss.getName(), overviewSubjectTeacher);
     
     //    updateCommentsColumn(ss);
     //    updateExportColumns(ss);
     //    updateFreezeRows(ss);
     //    updateRBFormulas(ss);
     //    updateDeleteUnusedDatesAndTitles(ss);
-    updateGradeScale(ss);
+    // updateGradeScale(ss);
     // updateConditionalFormatting(ss); // doesn't work in this scope :(
     
     //   sheet(report)
@@ -205,31 +209,43 @@ function test_updatePortfolios() {
 }
 
 function updateAllPortfolios() {
+  
   var students = getStudents();
   for (var s = 0; s < students.length; s++) {
-    // if (s > 5) break;
+    if (s > 2) break;
     
     var student = students[s];
     console.log("%s %s", student.fullname, student.fileid); 
     var pf = SpreadsheetApp.openById(student.fileid);
-    updatePortfolio(pf);
+    
+    updatePortfolioAttributes(pf);    
   }
 }
 
-function updatePortfolio(pf) {
+
+
+function updatePortfolioAttributes(pf) {
+  // one-shot function, probably never need again
   Logger.log ("Name: " + pf.getName());
   var pastoralSheet = pf.getSheetByName(top.SHEETS.PASTORAL);
+  
+  
+  // merge attributes cells, convert to formula
   pastoralSheet.getRange("B15:C23")
   .merge();
   
   pastoralSheet.getRange("B15")
   .setFormula(
-    '=textjoin("\n", TRUE, arrayformula(' + 
+    '=regexreplace(' +
+    'textjoin("\n", TRUE, arrayformula(' + 
     'if (Admin!B13:B21 <> "", ' +
     'upper(left(Admin!B13:B21)) & ' +
     'mid(Admin!B13:B21, 2, 999) & " " & ' +
-    'lower(Admin!A13:A21) & ".", "")))');
-  console.log("Successfully updated");
+    'lower(Admin!A13:A21) & ".", ""))' + 
+    '), "Mostly", "Mostly")'); // was Usually
+  
+  console.log("Successfully updated attributes");
+  
 }
 
 function updatePortfolioFormulas() {
@@ -266,6 +282,62 @@ function updatePortfolioFormulas() {
   
 }
 
+//function replaceInOverview() {
+//  //var pf = 
+//}
+//
+//function replaceInSS(pf) {
+//  // https://stackoverflow.com/questions/42150450/google-apps-script-for-multiple-find-and-replace-in-google-sheets
+//  
+//  var sheets = pf.getSheets();
+//  sheets.forEach(function (sheet, i) {
+//    replaceInSheet(sheet);
+//  });
+//}
+//function test_replaceInSheet() {
+//  var art9 = "1w-XKwxeUhzDNNYUQ1kqzQAzwn-QivCs0qc9Imj9oVKw";
+//  var ict7 = "1UV9BysLHpyz4_ycPaV9QO1LxumJYW02umDGQXU2RG-s"; 
+//  var pf = SpreadsheetApp.openById(ict7);
+//  var sheet = pf.getSheetByName("Overview");
+//  replaceInSheet(sheet);
+//}
+//
+//function replaceInSheet(sheet) {
+//  //  get the current data range values as an array
+//  //  Fewer calls to access the sheet -> lower overhead 
+//  var values = sheet.getDataRange().getValues();  
+//
+//  // update teachers
+//  replaceInValues(values, /^Mr\. Kershaw$/g, /John Kershaw/);
+//
+//  // update subjects
+//  replaceInValues(values, / ?Reportbook$/g, "");
+//
+//  // replace student names
+//  replaceInValues(values, /Caleb/g, /Haram/);
+//
+//  // Write all updated values to the sheet, at once
+//  sheet.getDataRange().setValues(values);
+//}
+
+//function replaceInValues(values, to_replace, replace_with) {
+//  //loop over the rows in the array
+//  for (var row in values) {
+//    //use Array.map to execute a replace call on each of the cells in the row.
+//    var replaced_values = values[row].map(function(original_value) {
+//      Logger.log("%s +> %s", original_value, typeof original_value == "string" && original_value.indexOf("=") == "-1");
+//      if (typeof original_value == "string" && original_value.indexOf("=") == "-1") {
+//        return original_value.replace(to_replace,replace_with);
+//      } else {
+//        return original_value;
+//      }
+//    });
+//
+//    //replace the original row values with the replaced values
+//    //values[row] = replaced_values;
+//  }
+//}
+
 function updateRBFormulas(ss) {
   
   var formulas = [
@@ -291,7 +363,13 @@ function updateRBFormulas(ss) {
       "cell": "F8",
       "range": "",
       "formula": '=arrayformula(if(index(Grades!$H$7:$Y$46, match($B$4,Grades!$D$7:$D$46,0)) = "", "", iferror(index(Grades!$H$7:$Y$46, match($B$4,Grades!$D$7:$D$46,0))/PointValues)))'
-    }
+    },
+    {"desc": "replace REP20% with weighting 20%",
+     "sheet": "Individual report",
+     "cell": "B6",
+     "range": "",
+     "formula": '=arrayformula(REGEXREPLACE({Grades!D3:X3}, " REP ?([0-9]*%?)\\z", " weighting $1"))'
+    } 
   ];
 
   updateFormulas(ss, formulas);
