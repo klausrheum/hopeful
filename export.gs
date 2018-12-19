@@ -52,7 +52,7 @@ function exportAllRBs() {
       continue;
       
     } else {
-      console.info("%s is ticked for export", rbId);
+      //console.info("%s is ticked for export", rbId);
       var rbss = SpreadsheetApp.openById(rbId);
       var rbName = rbss.getName();
 
@@ -385,11 +385,11 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             SpreadsheetApp.flush();
             
             // copy grades data
-            var titlesAndPercentages = rbRepSheet.getRange("B1:Q8").getValues();
-            portfolioSheet.getRange("B1:Q8").setValues(titlesAndPercentages);
+            var titlesAndPercentages = rbRepSheet.getRange("B1:S8").getValues();
+            portfolioSheet.getRange("B1:S8").setValues(titlesAndPercentages);
             
-            var letterGrades = rbRepSheet.getRange("B10:Q11").getValues();
-            portfolioSheet.getRange("B10:Q11").setValues(letterGrades);
+            var letterGrades = rbRepSheet.getRange("B10:S11").getValues();
+            portfolioSheet.getRange("B10:S11").setValues(letterGrades);
             
             // wipe out GPA (for now)
             portfolioSheet.getRange("C6:C11").setValue("");
@@ -397,11 +397,12 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             // add Comment
             portfolioSheet.getRange("I4").setValue(rowComment);
             
-            // clear out unused Titles
+            // clear out unused Titles otherwise arrayformula won't display
             updateValues(portfolioSheet, "F6:6", ["Title"], [""]);
             
             // delete grading info for non-graded subjects
-            if (["ELL", "VIA"].indexOf(tabName) == -1) {
+            var useUngradedTemplate = ["ELL", "VIA"].indexOf(tabName) > -1;
+            if (useUngradedTemplate) {
               portfolioSheet.getRange("B6:Q11").setValue("");  
               portfolioSheet.getRange("B6").setValue("This subject is not formally assessed");  
             }
@@ -637,10 +638,10 @@ function hideSheets() {
       var sheetName = thisSheet.getName();
       
       if (sheetName == top.SHEETS.ADMIN) {
-        console.log("[%s] I'm NOT going to delete sheet %s", ssName, sheetName);
+        console.log("[%s] I'm NOT going to hide sheet %s", ssName, sheetName);
         
       } else {
-        console.log("[%s] I AM going to delete sheet %s", ssName, sheetName); 
+        console.log("[%s] I AM going to hide sheet %s", ssName, sheetName); 
         thisSheet.setName(sheetName + postfix);
         thisSheet.hideSheet();
       }

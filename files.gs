@@ -143,9 +143,11 @@ function killSheets(ss, killPatterns) {
 function generateAllPortfolioPDFs() {
   var students = getStudents();
   for (var s = 0; s < students.length; s++) {
-    // if (s > 5) break;
+    //if (s > 5) break;
     
     var student = students[s];
+   // if (student.email != "caleb.kwon@students.hope.edu.kh") continue;
+    
     console.log("%s %s", student.fullname, student.fileid); 
     var pf = SpreadsheetApp.openById(student.fileid);
     createPdf(pf, [/^Admin$/, /.*_backup/], [/^Admin$/]);
