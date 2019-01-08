@@ -111,7 +111,7 @@ function killUnwantedPortfolioSheets() {
   for (var i=0; i<students.length; i++) {
     var ss = SpreadsheetApp.openById(students[i].fileid);
     console.warn("[%s] Checking for unwanted sheets to kill", students[i].fullname);
-    killSheets(ss, [/.*_backup/, /IGCSE MAT A/, /PED IGCSE/]);
+    killSheets(ss, [/.*_backup/, /English L/, /English Li/]);
     //if (i > 2) break;
   }
 }
@@ -130,7 +130,7 @@ function killSheets(ss, killPatterns) {
       
       if(sheetName.match(pattern) ) {
         ss.deleteSheet(s);  // UNCOMMENT THIS LINE TO USE
-        console.log ("'%s' found in sheetName '%s', killing", pattern, sheetName);
+        console.log ("[%s] '%s' found in sheetName '%s', killing", ss.getName(), pattern, sheetName);
         
       } else {
         // Logger.log ("'%s' not found in sheetName '%s', skipping", pattern, sheetName); 
@@ -142,27 +142,38 @@ function killSheets(ss, killPatterns) {
 
 function generateAllPortfolioPDFs() {
   var students = getStudents();
+  var pdfYears = ['Y11', 'Y12'];
+  
   for (var s = 0; s < students.length; s++) {
     //if (s > 5) break;
     
     var student = students[s];
-   // if (student.email != "caleb.kwon@students.hope.edu.kh") continue;
     
-    console.log("%s %s", student.fullname, student.fileid); 
+    // if (student.firstname != "Hahun") continue;
+    
+    var skipPDF = pdfYears.indexOf(student.year) == -1;
+    if (skipPDF) {
+      console.log("Skipping PDF export for %s in %s", student.fullname, student.year);
+      continue;
+    }
+    console.log("Export PDF for %s", student.fullname); 
     var pf = SpreadsheetApp.openById(student.fileid);
-    createPdf(pf, [/^Admin$/, /.*_backup/], [/^Admin$/]);
+
+    createPdf(pf, student.guardianemail, [/^Admin$/, /.*_backup/], [/^Admin$/]);
   }
   
 }
 
 function test_createPdf() {
-  var lisa = "1-L0dJ5d0ZE3QaVtR-6dTlAJVLVvc4cgWb_Twu5Zby-A"; 
-  var pf = SpreadsheetApp.openById(lisa);
+  var student = getStudentByEmail("tom.kershaw@students.hope.edu.kh"); 
+  var pf = SpreadsheetApp.openById(student.fileid);
+
   Logger.log(pf.getName());
-  createPdf(pf, [/^Admin$/, /.*_backup/], [/^Admin$/]);
+
+  createPdf(pf, student.guardianemail, [/^Admin$/, /.*_backup/], [/^Admin$/]);
 }
 
-function createPdf(ss, hideBeforePatterns, showAfterPatterns) {
+function createPdf(ss, guardianEmail, hideBeforePatterns, showAfterPatterns) {
   if (hideBeforePatterns === undefined) {
     hideBeforePatterns = [];
   }
@@ -193,7 +204,7 @@ function createPdf(ss, hideBeforePatterns, showAfterPatterns) {
   
   // savePDFs( ss, optSheetName , optOutputName, optEmail );
 
-  savePDF( ss, "john.kershaw@hope.edu.kh" );
+  savePDF( ss, guardianEmail );
   
   // show all the sheets we want visible again after PDFing
   sheets.forEach(function (s, i) {
@@ -270,7 +281,7 @@ function savePDF( ss, optEmail) {
   folder.createFile(blob);
   
   if (optEmail) {
-    GmailApp.sendEmail(optEmail, "Here is a file named " + outputName, "Please let me know if you have any questions or comments.", {attachments:blob});
+    GmailApp.sendEmail(optEmail, "School Report for " + outputName, "Dear Parents,\nPlease contact the subject teacher if you have subject specific questions.\n\nWarm regards,\nMongkul\nPA to the Principal.", {attachments:blob});
   }
 } 
 

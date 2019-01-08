@@ -394,6 +394,16 @@ function exportStudentsFromRB(rbss, studentsToUpdate) {
             // wipe out GPA (for now)
             portfolioSheet.getRange("C6:C11").setValue("");
             
+            // wipe out %age (for now)
+            if (student.year == "Y11" || student.year == "Y12") {
+              var containsCPE = tabName.indexOf("CPE") != -1; 
+              var containsTOK = tabName.indexOf("TOK") != -1;
+              if (! containsCPE && ! containsTOK) { 
+                portfolioSheet.getRange("E6:E11").setValue("");
+                console.log("Clearing percentages for %s", tabName);
+              }
+            }
+            
             // add Comment
             portfolioSheet.getRange("I4").setValue(rowComment);
             
@@ -660,7 +670,7 @@ function test_backupPastoralAdmin() {
 function backupAllPastoralAdmin() {
   
   for (var s = 0; s < top.students.length; s++) {
-    //if (s >= 1) break;
+    //if (s >= 11) break;
     
     var student = top.students[s];
     backupPastoralAdmin(student);
@@ -669,10 +679,10 @@ function backupAllPastoralAdmin() {
 
 function backupPastoralAdmin(student) {
   var fields = [
-//    [top.CELLS.ADMINPASTORALTEACHER, top.COLS.PASTORALTEACHERBACKUP],
-//    [top.CELLS.ADMINEXTRACURRICULAR, top.COLS.EXTRACURRICULARBACKUP],
-//    [top.CELLS.ADMINATTENDANCETOTAL, top.COLS.ATTENDANCETOTALBACKUP],
-//    [top.CELLS.ADMINPASTORALCOMMENT, top.COLS.PASTORALCOMMENTBACKUP]
+    [top.CELLS.ADMINPASTORALTEACHER, top.COLS.PASTORALTEACHERBACKUP],
+    [top.CELLS.ADMINEXTRACURRICULAR, top.COLS.EXTRACURRICULARBACKUP],
+    [top.CELLS.ADMINATTENDANCETOTAL, top.COLS.ATTENDANCETOTALBACKUP],
+    [top.CELLS.ADMINPASTORALCOMMENT, top.COLS.PASTORALCOMMENTBACKUP]
   ];
   
   console.warn('Backing up Pastoral Admin data for %s', student.fullname);

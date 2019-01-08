@@ -1,11 +1,9 @@
 /*
-=== manifest - what files do which functions? ===
+=== manifest - what does each file do? ===
 
 main.gs = global objects and helper functions
 
-files.gs = move files around (when a new file is shared to Klaus, 
-    automatically move it into the Reportbooks folder and add a line
-    to the Reportbooks tracker spreadsheet
+files.gs = move files around, create PDFs, copy newly shared Reportbooks to the Reportbooks folder
     
 export.gs = handles exporting students to individual Portfolio spreadsheets</li>
 

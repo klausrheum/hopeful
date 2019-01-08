@@ -202,27 +202,33 @@ function test_updatePortfolios() {
   // convert the attributes table to full sentences
   var testEmail = "bobby.tables@students.hope.edu.kh";
   testEmail = "johannes.christensen@students.hope.edu.kh";
-  testEmail = "thomas.norman@students.hope.edu.kh";
+  testEmail = "nawin.vong@students.hope.edu.kh";
   var student = getStudentByEmail(testEmail);
   var pf = SpreadsheetApp.openById(student.fileid);
-  updatePortfolio(pf);
+  updatePortfolioWrapExtraCurricular(pf);
 }
 
 function updateAllPortfolios() {
   
   var students = getStudents();
   for (var s = 0; s < students.length; s++) {
-    if (s > 2) break;
+    //if (s > 2) break;
     
     var student = students[s];
     console.log("%s %s", student.fullname, student.fileid); 
     var pf = SpreadsheetApp.openById(student.fileid);
     
-    updatePortfolioAttributes(pf);    
+    //updatePortfolioAttributes(pf);
+    updatePortfolioWrapExtraCurricular(pf);    
   }
 }
 
-
+function updatePortfolioWrapExtraCurricular(pf) {
+  var pastoralSheet = pf.getSheetByName(top.SHEETS.PASTORAL);
+  pastoralSheet.getRange("B12")
+  .setHorizontalAlignment("left")
+  .setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
+}
 
 function updatePortfolioAttributes(pf) {
   // one-shot function, probably never need again

@@ -19,6 +19,7 @@ var bobby = {
 };
 
 
+
 // TODO finish this - add  
 function testUpdateStudentFromSheet() {
   var fromSheetKid = "nofirstname.nolastname@students.hope.edu.kh";
@@ -235,6 +236,7 @@ function initialiseStudents() {
       "link": makeLink(data[d][top.COLS.FILEID-1]),
       "tabs": data[d][top.COLS.TABS-1],
       "row": d+1,
+      "guardianemail": data[d][top.COLS.GUARDIANEMAIL-1],
     };
     
     // TODO DELETE? student.link = makeLink(student.fileid);
